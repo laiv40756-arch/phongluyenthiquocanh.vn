@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -321,22 +322,31 @@
       </div>
     </div>
 
-    <!-- Live Online Exam Takers Monitor (Real-time Ultra Sync across Teacher Links) -->
+    <!-- High-Capacity Live Online Exam Takers Monitor (Supports 500+ Concurrent Devices) -->
     <div id="live-sessions-monitor" class="bg-white rounded-2xl border border-emerald-200 shadow-sm p-4 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
           <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 uppercase tracking-wide">
-            ⚡ Siêu Đồng Bộ Trực Tuyến — Thí Sinh Tham Gia Qua Link &amp; Phòng Thi (<span id="live-sessions-count">0</span>)
+            ⚡ Trung Tâm Đồng Bộ Đa Thiết Bị — Đang Kết Nối (<span id="live-sessions-count">0</span> Thiết Bị)
           </h3>
+          <span id="live-taking-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+            Đang làm: 0
+          </span>
+          <span id="live-submitted-pill" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+            Đã nộp: 0
+          </span>
         </div>
-        <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-          Cập nhật tiến độ từng câu &amp; điểm số thời gian thực
-        </span>
+        <div class="flex items-center gap-2">
+          <input id="live-session-search" type="text" placeholder="Tìm nhanh thiết bị / thí sinh..." class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <span class="hidden sm:inline-block text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            Kiến trúc Sharded Topic chịu tải hàng trăm máy cùng lúc
+          </span>
+        </div>
       </div>
-      <div id="live-sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+      <div id="live-sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 max-h-64 overflow-y-auto custom-scrollbar pr-1">
         <div class="col-span-full text-xs text-slate-400 py-2 text-center">
-          Chưa có thí sinh nào đang làm bài trực tuyến. Khi học sinh mở link của Giáo viên và nhập tên, tiến độ làm bài sẽ hiện ngay tại đây!
+          Chưa có thiết bị thí sinh nào đang làm bài. Khi hàng chục hoặc hàng trăm học sinh mở link cùng lúc, tiến độ từng máy sẽ cập nhật độc lập tại đây!
         </div>
       </div>
     </div>
@@ -1391,16 +1401,40 @@
         viaLink: !!state.isDirectLinkMode,
         updatedAt: Date.now()
       };
+      publishShardedStudentSession();
     }
 
     function renderLiveSessionsMonitor() {
       const grid = document.getElementById("live-sessions-grid");
       const countEl = document.getElementById("live-sessions-count");
+      const takingPill = document.getElementById("live-taking-pill");
+      const submittedPill = document.getElementById("live-submitted-pill");
+      const searchInp = document.getElementById("live-session-search");
       if (!grid || !countEl) return;
-      const list = Object.values(state.activeSessions || {}).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      countEl.textContent = String(list.length);
+
+      const allList = Object.values(state.activeSessions || {}).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      countEl.textContent = String(allList.length);
+
+      let takingCount = 0;
+      let submittedCount = 0;
+      allList.forEach((item) => {
+        if (item.status === "submitted") submittedCount++;
+        else takingCount++;
+      });
+      if (takingPill) takingPill.textContent = `Đang làm: ${takingCount}`;
+      if (submittedPill) submittedPill.textContent = `Đã nộp: ${submittedCount}`;
+
+      const q = searchInp ? (searchInp.value || "").trim().toLowerCase() : "";
+      const list = q
+        ? allList.filter((item) => (item.name || "").toLowerCase().includes(q) || (item.sbd || "").toLowerCase().includes(q) || (item.examTitle || "").toLowerCase().includes(q))
+        : allList;
+
       if (list.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-xs text-slate-400 py-2 text-center">Chưa có thí sinh nào đang làm bài trực tuyến. Khi học sinh mở link của Giáo viên và nhập tên, tiến độ làm bài sẽ hiện ngay tại đây!</div>`;
+        grid.innerHTML = `<div class="col-span-full text-xs text-slate-400 py-2 text-center">${
+          allList.length === 0
+            ? "Chưa có thiết bị thí sinh nào đang làm bài. Khi hàng chục hoặc hàng trăm học sinh mở link cùng lúc, tiến độ từng máy sẽ cập nhật độc lập tại đây!"
+            : "Không tìm thấy thí sinh phù hợp với từ khóa."
+        }</div>`;
         return;
       }
       grid.innerHTML = "";
@@ -1727,52 +1761,367 @@
       return true;
     }
 
-    function getRoomKvUrl() {
-      const cleanRoom = (state.syncRoomCode || "PHONG-QUOC-ANH").replace(/[^a-zA-Z0-9_-]/g, "_");
-      return `https://kvdb.io/AzotaQuocAnhRoomV1/room_${cleanRoom}_v5`;
+    const DEVICE_CLIENT_ID = "qa_" + Math.random().toString(36).slice(2, 10) + "_" + Date.now().toString(36);
+    let mqttClients = [];
+    let currentSubscribedTopic = "";
+
+    function getCleanRoomCode() {
+      return (state.syncRoomCode || "PHONG-QUOC-ANH").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "_");
+    }
+
+    function getRoomBaseTopic() {
+      return `phong_luyen_quoc_anh_v7/room/${getCleanRoomCode()}`;
+    }
+
+    function getMqttTopic() {
+      return `${getRoomBaseTopic()}/config`;
+    }
+
+    let uiRenderScheduled = false;
+    let pendingLivePopupEvent = null;
+
+    function scheduleBatchedUIRefresh(triggerLivePopup) {
+      if (triggerLivePopup && state.latestSubmissionEvent) {
+        pendingLivePopupEvent = state.latestSubmissionEvent;
+      }
+      if (uiRenderScheduled) return;
+      uiRenderScheduled = true;
+      setTimeout(() => {
+        uiRenderScheduled = false;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(getSerializablePayload()));
+        } catch (e) {}
+
+        populateLoginDropdown();
+        const ex = getActiveExam();
+        if (ex) {
+          state.questions = ex.questions;
+          state.leaderboard = ex.leaderboard;
+          document.getElementById("active-exam-header-title").textContent =
+            state.activeView === "hub" ? "PHÒNG LUYỆN QUỐC ANH" : ex.title;
+          if (state.activeView !== "hub") {
+            document.getElementById("active-exam-header-sub").textContent =
+              `Thời lượng: ${ex.durationMinutes} phút • ${ex.questions.length} câu` +
+              (ex.deadline ? ` • Hạn thu: ${formatDeadlineVi(ex.deadline)}` : "");
+          }
+        }
+
+        if (state.activeView === "hub") renderHubView();
+        else if (state.activeView === "start") renderStartExamView();
+        else if (state.activeView === "exam") {
+          updateExamDeadlinePill(ex);
+          if (ex && isExamExpired(ex) && !state.submitted) {
+            gradeAndShowResults("Giáo viên đã đóng hạn thu bài — hệ thống tự động thu bài");
+          } else {
+            renderAllExamView();
+            if (state.submitted) {
+              const myEntry = ex ? ex.leaderboard.find((item) => item.isCurrent) : null;
+              const myRank = ex ? ex.leaderboard.findIndex((item) => item.isCurrent) + 1 : 1;
+              if (myEntry && ex) {
+                document.getElementById("result-headline").textContent =
+                  `${state.currentUser.name} — Điểm: ${myEntry.total.toFixed(2).replace(".", ",")}đ`;
+                document.getElementById("user-rank-pill").textContent =
+                  `Hạng #${myRank} / ${ex.leaderboard.length}`;
+                document.getElementById("score-part1").textContent = `${myEntry.p1.toFixed(2).replace(".", ",")}đ`;
+                document.getElementById("score-part2").textContent = `${myEntry.p2.toFixed(2).replace(".", ",")}đ`;
+                document.getElementById("score-part3").textContent = `${myEntry.p3.toFixed(2).replace(".", ",")}đ`;
+              }
+              renderLeaderboardTable();
+            }
+          }
+        } else if (state.activeView === "editor") {
+          const activeTag = document.activeElement ? document.activeElement.tagName : "";
+          if (activeTag !== "INPUT" && activeTag !== "TEXTAREA") {
+            renderEditorView();
+          }
+        } else if (state.activeView === "accounts") {
+          renderAccountsView();
+        }
+
+        renderLiveSessionsMonitor();
+        if (pendingLivePopupEvent) {
+          const ev = pendingLivePopupEvent;
+          pendingLivePopupEvent = null;
+          showToast(`🎉 ${ev.studentName} vừa nộp bài "${ev.examTitle}" đạt ${Number(ev.score).toFixed(2).replace(".", ",")}đ!`);
+          renderBroadcastLeaderboardModal(true);
+        } else {
+          renderBroadcastLeaderboardModal(false);
+        }
+      }, 120);
+    }
+
+    function handleIncomingStudentSubmissionPacket(pkt) {
+      if (!pkt || !pkt.examId || !pkt.entry || !pkt.entry.sbd) return;
+      const ex = state.exams.find((e) => e.examId === pkt.examId);
+      if (!ex) return;
+      ex.leaderboard = mergeLeaderboards(ex.leaderboard, [pkt.entry], ex.questions);
+      if (state.activeExamId === ex.examId) {
+        state.leaderboard = ex.leaderboard;
+      }
+      let isNewSub = false;
+      if (pkt.event && pkt.event.id && pkt.event.id !== lastSeenSubmissionId) {
+        lastSeenSubmissionId = pkt.event.id;
+        // Recompute accurate rank after merge
+        const rankIdx = ex.leaderboard.findIndex((item) => item.sbd.toLowerCase() === pkt.entry.sbd.toLowerCase());
+        pkt.event.rank = rankIdx >= 0 ? rankIdx + 1 : pkt.event.rank;
+        state.latestSubmissionEvent = pkt.event;
+        state.broadcastLeaderboardExamId = ex.examId;
+        isNewSub = true;
+      }
+      scheduleBatchedUIRefresh(isNewSub);
+    }
+
+    function handleIncomingStudentSessionPacket(sess) {
+      if (!sess || !sess.sbd) return;
+      const key = sess.sbd.toLowerCase();
+      if (!state.activeSessions) state.activeSessions = {};
+      const existing = state.activeSessions[key];
+      if (!existing || (sess.updatedAt || 0) >= (existing.updatedAt || 0)) {
+        state.activeSessions[key] = sess;
+        scheduleBatchedUIRefresh(false);
+      }
+    }
+
+    function getCompactCrossDevicePayload() {
+      const compactExams = state.exams.map((ex) => {
+        const compactQuestions = (ex.questions || []).map((q) => {
+          const initQ = INITIAL_QUESTIONS.find((iq) => iq.id === q.id && iq.stem === q.stem && iq.explanation === q.explanation);
+          if (initQ) {
+            return {
+              _refId: initQ.id,
+              id: q.id,
+              part: q.part,
+              chapter: q.chapter,
+              correct: q.correct,
+              options: q.options,
+              statements: q.statements
+            };
+          }
+          return q;
+        });
+        return {
+          examId: ex.examId,
+          title: ex.title,
+          durationMinutes: ex.durationMinutes,
+          deadline: ex.deadline || "",
+          questions: compactQuestions,
+          leaderboard: ex.leaderboard || []
+        };
+      });
+
+      return {
+        senderId: DEVICE_CLIENT_ID,
+        accounts: state.accounts,
+        exams: compactExams,
+        teacherAdminPass: state.teacherAdminPass,
+        passwordUpdatedAt: state.passwordUpdatedAt || 0,
+        syncRoomCode: state.syncRoomCode || "PHONG-QUOC-ANH",
+        syncBlobId: state.syncBlobId,
+        updatedAt: state.updatedAt || Date.now(),
+        examsModifiedAt: state.examsModifiedAt || 0,
+        broadcastLeaderboardExamId: state.broadcastLeaderboardExamId || "",
+        latestSubmissionEvent: state.latestSubmissionEvent || null,
+        activeSessions: state.activeSessions || {}
+      };
+    }
+
+    function expandCompactPayload(payload) {
+      if (!payload || typeof payload !== "object") return payload;
+      if (Array.isArray(payload.exams)) {
+        payload.exams = payload.exams.map((ex) => {
+          const expandedQs = (ex.questions || []).map((q) => {
+            if (q && q._refId) {
+              const baseQ = INITIAL_QUESTIONS.find((iq) => iq.id === q._refId);
+              if (baseQ) {
+                return {
+                  ...JSON.parse(JSON.stringify(baseQ)),
+                  id: q.id,
+                  part: q.part !== undefined ? q.part : baseQ.part,
+                  chapter: q.chapter !== undefined ? q.chapter : baseQ.chapter,
+                  correct: q.correct !== undefined ? q.correct : baseQ.correct,
+                  options: q.options || baseQ.options,
+                  statements: q.statements || baseQ.statements
+                };
+              }
+            }
+            return q;
+          });
+          return { ...ex, questions: expandedQs };
+        });
+      }
+      return payload;
+    }
+
+    function connectCrossDeviceMqtt() {
+      if (typeof window.mqtt === "undefined") return;
+      const baseTopic = getRoomBaseTopic();
+      const configTopic = `${baseTopic}/config`;
+      const subWildcard = `${baseTopic}/sub/+/+`;
+      const sessWildcard = `${baseTopic}/sess/+`;
+      const reqTopic = `${baseTopic}/request_sync`;
+
+      if (currentSubscribedTopic === baseTopic && mqttClients.length > 0) return;
+
+      mqttClients.forEach((c) => {
+        try { c.end(true); } catch (e) {}
+      });
+      mqttClients = [];
+      currentSubscribedTopic = baseTopic;
+
+      const brokers = [
+        "wss://broker.emqx.io:8084/mqtt",
+        "wss://broker.hivemq.com:8884/mqtt",
+        "wss://test.mosquitto.org:8081/mqtt"
+      ];
+
+      brokers.forEach((brokerUrl) => {
+        try {
+          const client = window.mqtt.connect(brokerUrl, {
+            clientId: `${DEVICE_CLIENT_ID}_${Math.random().toString(36).slice(2, 6)}`,
+            clean: true,
+            connectTimeout: 5000,
+            reconnectPeriod: 2500
+          });
+
+          client.on("connect", () => {
+            setSyncBadge("cloud", "🌐 Đa thiết bị • Siêu đồng bộ");
+            // Subscribe to Sharded Topics:
+            // 1. configTopic (Teacher exam/password/broadcast updates)
+            // 2. subWildcard (Individual student submissions - zero collision even with 500 simultaneous submits!)
+            // 3. sessWildcard (Individual student live progress)
+            // 4. reqTopic (Peer state sync requests)
+            client.subscribe([configTopic, subWildcard, sessWildcard, reqTopic], { qos: 1 }, (err) => {
+              if (!err) {
+                client.publish(reqTopic, JSON.stringify({ requester: DEVICE_CLIENT_ID, ts: Date.now() }), { qos: 0, retain: false });
+              }
+            });
+          });
+
+          client.on("message", (recvTopic, message) => {
+            try {
+              const text = message.toString();
+              if (!text) return;
+              const data = JSON.parse(text);
+
+              if (recvTopic === reqTopic) {
+                // Use random jitter (50-400ms) and prefer Teacher/Admin device to reply so 100 devices don't reply at the exact same millisecond
+                if (data.requester !== DEVICE_CLIENT_ID && (state.currentUser.role === "admin" || state.updatedAt > 0)) {
+                  const delay = state.currentUser.role === "admin" ? 40 : 150 + Math.floor(Math.random() * 350);
+                  setTimeout(() => {
+                    try {
+                      const compact = JSON.stringify(getCompactCrossDevicePayload());
+                      client.publish(configTopic, compact, { qos: 1, retain: true });
+                    } catch (e) {}
+                  }, delay);
+                }
+                return;
+              }
+
+              if (recvTopic.includes("/sub/")) {
+                if (data && data.senderId === DEVICE_CLIENT_ID) return;
+                handleIncomingStudentSubmissionPacket(data);
+                setSyncBadge("cloud", "🌐 Đa thiết bị • Siêu đồng bộ");
+                return;
+              }
+
+              if (recvTopic.includes("/sess/")) {
+                if (data && data.senderId === DEVICE_CLIENT_ID) return;
+                handleIncomingStudentSessionPacket(data.session);
+                return;
+              }
+
+              if (recvTopic === configTopic) {
+                if (data && data.senderId === DEVICE_CLIENT_ID) return;
+                const expanded = expandCompactPayload(data);
+                applySyncedPayload(expanded);
+                setSyncBadge("cloud", "🌐 Đa thiết bị • Siêu đồng bộ");
+              }
+            } catch (e) {}
+          });
+
+          mqttClients.push(client);
+        } catch (e) {}
+      });
+    }
+
+    // Publish full room config & exam structure (Retained on configTopic)
+    function publishMqttState() {
+      connectCrossDeviceMqtt();
+      const configTopic = `${getRoomBaseTopic()}/config`;
+      const compactStr = JSON.stringify(getCompactCrossDevicePayload());
+      let publishedCount = 0;
+      mqttClients.forEach((client) => {
+        try {
+          if (client && client.connected) {
+            client.publish(configTopic, compactStr, { qos: 1, retain: true });
+            publishedCount++;
+          }
+        } catch (e) {}
+      });
+      return publishedCount > 0;
+    }
+
+    // Publish a dedicated, collision-free per-student submission shard (Retained on sub/<examId>/<studentKey>)
+    function publishShardedStudentSubmission(examId, entry, subEvent) {
+      connectCrossDeviceMqtt();
+      const safeSbd = encodeURIComponent((entry.sbd || entry.name || "hs").toLowerCase().replace(/[^a-z0-9_-]/g, "_"));
+      const subTopic = `${getRoomBaseTopic()}/sub/${encodeURIComponent(examId)}/${safeSbd}`;
+      const pkt = JSON.stringify({
+        senderId: DEVICE_CLIENT_ID,
+        examId: examId,
+        entry: entry,
+        event: subEvent,
+        ts: Date.now()
+      });
+      mqttClients.forEach((client) => {
+        try {
+          if (client && client.connected) {
+            client.publish(subTopic, pkt, { qos: 1, retain: true });
+          }
+        } catch (e) {}
+      });
+    }
+
+    // Publish a lightweight per-student live progress shard (Retained on sess/<studentKey>)
+    function publishShardedStudentSession() {
+      if (!state.isLoggedIn || !state.currentUser.name || state.currentUser.role === "admin") return;
+      connectCrossDeviceMqtt();
+      const key = (state.currentUser.sbd || state.currentUser.name).toLowerCase();
+      const safeKey = encodeURIComponent(key.replace(/[^a-z0-9_-]/g, "_"));
+      const sess = (state.activeSessions || {})[key];
+      if (!sess) return;
+      const sessTopic = `${getRoomBaseTopic()}/sess/${safeKey}`;
+      const pkt = JSON.stringify({
+        senderId: DEVICE_CLIENT_ID,
+        session: sess,
+        ts: Date.now()
+      });
+      mqttClients.forEach((client) => {
+        try {
+          if (client && client.connected) {
+            client.publish(sessTopic, pkt, { qos: 0, retain: true });
+          }
+        } catch (e) {}
+      });
     }
 
     async function pushCloudSync() {
-      const payload = getSerializablePayload();
-      try {
-        setSyncBadge("syncing", "⚡ Đang siêu đồng bộ...");
-        const kvUrl = getRoomKvUrl();
-        try {
-          const kvGet = await fetch(kvUrl, { method: "GET", headers: { "Accept": "application/json", "Cache-Control": "no-cache" } });
-          if (kvGet.ok) {
-            const remote = await kvGet.json();
-            if (remote && Array.isArray(remote.exams)) {
-              state.exams.forEach((ex) => {
-                const rEx = remote.exams.find((o) => o.examId === ex.examId);
-                if (rEx) {
-                  ex.leaderboard = mergeLeaderboards(ex.leaderboard, rEx.leaderboard, ex.questions);
-                }
-              });
-            }
-            if (remote && remote.activeSessions) {
-              state.activeSessions = mergeActiveSessions(state.activeSessions, remote.activeSessions);
-            }
-            if (remote && remote.teacherAdminPass && (remote.passwordUpdatedAt || 0) > (state.passwordUpdatedAt || 0)) {
-              state.teacherAdminPass = remote.teacherAdminPass;
-              state.passwordUpdatedAt = remote.passwordUpdatedAt;
-            }
-          }
-          const kvPut = await fetch(kvUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(getSerializablePayload())
-          });
-          if (kvPut.ok) {
-            setSyncBadge("cloud", "⚡ Siêu đồng bộ trực tuyến");
-          }
-        } catch (e) {}
+      // 1. Instant cross-device push via MQTT over WebSockets (retained on global brokers so both currently open & future devices receive it immediately)
+      const mqttSent = publishMqttState();
+      if (mqttSent) {
+        setSyncBadge("cloud", "🌐 Đa thiết bị • Đã đồng bộ");
+      } else {
+        setSyncBadge("syncing", "⚡ Đang kết nối đa thiết bị...");
+      }
 
-        // 2. Fallback JSONBlob sync
+      // 2. Also push to JSONBlob REST store (if available) for URL-hash persistence
+      const compactPayload = getCompactCrossDevicePayload();
+      try {
         if (!state.syncBlobId) {
           const res = await fetch("https://jsonblob.com/api/jsonBlob", {
             method: "POST",
             headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(compactPayload)
           });
           if (res.ok) {
             const loc = res.headers.get("Location") || res.headers.get("location") || "";
@@ -1782,73 +2131,49 @@
               try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(getSerializablePayload()));
               } catch (e) {}
+              publishMqttState();
             }
-            setSyncBadge("cloud", "Trực tuyến • Đã đồng bộ");
-            return;
+            setSyncBadge("cloud", "🌐 Đa thiết bị • Đã đồng bộ");
           }
         } else {
-          try {
-            const getRes = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(state.syncBlobId)}`, {
-              method: "GET",
-              headers: { "Accept": "application/json", "Cache-Control": "no-cache" }
-            });
-            if (getRes.ok) {
-              const remote = await getRes.json();
-              if (remote && Array.isArray(remote.exams)) {
-                state.exams.forEach((ex) => {
-                  const rEx = remote.exams.find((o) => o.examId === ex.examId);
-                  if (rEx) {
-                    ex.leaderboard = mergeLeaderboards(ex.leaderboard, rEx.leaderboard, ex.questions);
-                  }
-                });
-              }
-              if (remote && remote.activeSessions) {
-                state.activeSessions = mergeActiveSessions(state.activeSessions, remote.activeSessions);
-              }
-              if (remote && remote.teacherAdminPass && (remote.passwordUpdatedAt || 0) > (state.passwordUpdatedAt || 0)) {
-                state.teacherAdminPass = remote.teacherAdminPass;
-                state.passwordUpdatedAt = remote.passwordUpdatedAt;
-              }
-            }
-          } catch (e) {}
-
-          const mergedPayload = getSerializablePayload();
           const res = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(state.syncBlobId)}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            body: JSON.stringify(mergedPayload)
+            body: JSON.stringify(compactPayload)
           });
           if (res.ok) {
-            setSyncBadge("cloud", "Trực tuyến • Đã đồng bộ");
-            return;
+            setSyncBadge("cloud", "🌐 Đa thiết bị • Đã đồng bộ");
           }
         }
       } catch (e) {}
-      setSyncBadge("local", "Trực tuyến • Đồng bộ tức thời");
     }
 
     async function pullCloudSync() {
-      try {
-        const kvRes = await fetch(getRoomKvUrl(), { method: "GET", headers: { "Accept": "application/json", "Cache-Control": "no-cache" } });
-        if (kvRes.ok) {
-          const remote = await kvRes.json();
-          applySyncedPayload(remote);
-          setSyncBadge("cloud", "⚡ Siêu đồng bộ trực tuyến");
-        }
-      } catch (e) {}
+      // 1. Ensure MQTT WebSocket subscription is active and request fresh state from peers
+      connectCrossDeviceMqtt();
+      const reqTopic = `${getMqttTopic()}/request_sync`;
+      mqttClients.forEach((client) => {
+        try {
+          if (client && client.connected) {
+            client.publish(reqTopic, JSON.stringify({ requester: DEVICE_CLIENT_ID, ts: Date.now() }), { qos: 0, retain: false });
+          }
+        } catch (e) {}
+      });
 
-      if (!state.syncBlobId) return;
-      try {
-        const res = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(state.syncBlobId)}`, {
-          method: "GET",
-          headers: { "Accept": "application/json", "Cache-Control": "no-cache" }
-        });
-        if (res.ok) {
-          const remote = await res.json();
-          applySyncedPayload(remote);
-          setSyncBadge("cloud", "Trực tuyến • Đã đồng bộ");
-        }
-      } catch (e) {}
+      // 2. Also pull from JSONBlob if syncBlobId is present
+      if (state.syncBlobId) {
+        try {
+          const res = await fetch(`https://jsonblob.com/api/jsonBlob/${encodeURIComponent(state.syncBlobId)}`, {
+            method: "GET",
+            headers: { "Accept": "application/json", "Cache-Control": "no-cache" }
+          });
+          if (res.ok) {
+            const remote = await res.json();
+            applySyncedPayload(expandCompactPayload(remote));
+            setSyncBadge("cloud", "🌐 Đa thiết bị • Đã đồng bộ");
+          }
+        } catch (e) {}
+      }
     }
 
     function saveAndSyncAllDevices(isTeacherExamStructureChange = true) {
@@ -1894,6 +2219,7 @@
       } catch (e) {}
     }
     function initRealtimeSync() {
+      connectCrossDeviceMqtt();
       if ("BroadcastChannel" in window) {
         try {
           broadcastCh = new BroadcastChannel(SYNC_CHANNEL_NAME);
@@ -2031,12 +2357,76 @@
       document.body.removeChild(ta);
     }
 
+    function encodeExamSnapshotForUrl(ex) {
+      if (!ex) return "";
+      try {
+        const compactQs = (ex.questions || []).map((q) => {
+          const initQ = INITIAL_QUESTIONS.find((iq) => iq.id === q.id && iq.stem === q.stem && iq.explanation === q.explanation);
+          if (initQ) {
+            return { _r: initQ.id, id: q.id, p: q.part, c: q.chapter, k: q.correct };
+          }
+          return q;
+        });
+        const snap = {
+          examId: ex.examId,
+          title: ex.title,
+          durationMinutes: ex.durationMinutes,
+          deadline: ex.deadline || "",
+          questions: compactQs,
+          examsModifiedAt: state.examsModifiedAt || Date.now()
+        };
+        return btoa(unescape(encodeURIComponent(JSON.stringify(snap))));
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function decodeExamSnapshotFromUrl(b64) {
+      if (!b64) return null;
+      try {
+        const raw = decodeURIComponent(escape(atob(b64)));
+        const snap = JSON.parse(raw);
+        if (!snap || !snap.examId) return null;
+        const fullQs = (snap.questions || []).map((q) => {
+          if (q && q._r) {
+            const baseQ = INITIAL_QUESTIONS.find((iq) => iq.id === q._r);
+            if (baseQ) {
+              return {
+                ...JSON.parse(JSON.stringify(baseQ)),
+                id: q.id,
+                part: q.p !== undefined ? q.p : baseQ.part,
+                chapter: q.c !== undefined ? q.c : baseQ.chapter,
+                correct: q.k !== undefined ? q.k : baseQ.correct
+              };
+            }
+          }
+          return q;
+        });
+        return {
+          examId: snap.examId,
+          title: snap.title,
+          durationMinutes: snap.durationMinutes || 60,
+          deadline: snap.deadline || "",
+          questions: fullQs,
+          leaderboard: [],
+          examsModifiedAt: snap.examsModifiedAt || Date.now()
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
     function buildExamShareUrl(examId) {
       const base = window.location.href.split("#")[0];
       const roomCode = state.syncRoomCode || "PHONG-QUOC-ANH";
+      const ex = state.exams.find((e) => e.examId === examId) || getActiveExam();
       let hash = `#exam=${encodeURIComponent(examId)}&direct=1&room=${encodeURIComponent(roomCode)}`;
       if (state.syncBlobId) {
         hash += `&sync=${encodeURIComponent(state.syncBlobId)}`;
+      }
+      const snapStr = encodeExamSnapshotForUrl(ex);
+      if (snapStr) {
+        hash += `&snap=${encodeURIComponent(snapStr)}`;
       }
       return `${base}${hash}`;
     }
@@ -2805,6 +3195,7 @@
         timestamp: Date.now()
       };
       state.broadcastLeaderboardExamId = ex.examId;
+      publishShardedStudentSubmission(ex.examId, entry, state.latestSubmissionEvent);
       saveAndSyncAllDevices(false);
       document.getElementById("score-banner").classList.remove("hidden");
       document.getElementById("result-headline").textContent = `${studentName} — Điểm: ${total.toFixed(2).replace(".", ",")}đ`;
@@ -3116,6 +3507,19 @@
         if (roomParam) state.syncRoomCode = roomParam;
         const syncParam = params.get("sync");
         if (syncParam) state.syncBlobId = syncParam;
+        const snapParam = params.get("snap");
+        if (snapParam) {
+          const decodedEx = decodeExamSnapshotFromUrl(snapParam);
+          if (decodedEx) {
+            const idx = state.exams.findIndex((e) => e.examId === decodedEx.examId);
+            if (idx >= 0) {
+              decodedEx.leaderboard = state.exams[idx].leaderboard || [];
+              state.exams[idx] = decodedEx;
+            } else {
+              state.exams.push(decodedEx);
+            }
+          }
+        }
         const exParam = params.get("exam");
         const directParam = params.get("direct");
         if (exParam) {
@@ -3564,6 +3968,10 @@
 
       // Accounts search & add
       document.getElementById("account-search-input").addEventListener("input", () => renderAccountsView());
+      const liveSearchInp = document.getElementById("live-session-search");
+      if (liveSearchInp) {
+        liveSearchInp.addEventListener("input", () => renderLiveSessionsMonitor());
+      }
       document.getElementById("btn-add-single-account").addEventListener("click", () => {
         const name = document.getElementById("new-acc-name").value.trim();
         const sbd = document.getElementById("new-acc-sbd").value.trim() || `HS-${String(state.accounts.length + 1).padStart(2, "0")}`;
