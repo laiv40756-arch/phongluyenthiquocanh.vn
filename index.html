@@ -435,26 +435,47 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 text-center">
-          <div class="text-[11px] font-semibold text-slate-500 uppercase">Thời gian làm bài</div>
-          <div id="start-exam-duration" class="text-lg font-extrabold text-blue-900 mt-1">90 phút</div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 text-center">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Thời lượng</div>
+          <div id="start-exam-duration" class="text-base sm:text-lg font-extrabold text-blue-900 mt-1">90 phút</div>
         </div>
-        <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 text-center">
-          <div class="text-[11px] font-semibold text-slate-500 uppercase">Số lượng câu hỏi</div>
-          <div id="start-exam-qcount" class="text-lg font-extrabold text-slate-900 mt-1">22 câu</div>
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 text-center">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Số câu hỏi</div>
+          <div id="start-exam-qcount" class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">22 câu</div>
         </div>
-        <div class="col-span-2 sm:col-span-1 bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 text-center">
-          <div class="text-[11px] font-semibold text-slate-500 uppercase">Hạn thu bài</div>
-          <div id="start-exam-deadline" class="text-xs sm:text-sm font-extrabold text-rose-700 mt-1.5">Không giới hạn</div>
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 text-center">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Mở bài từ</div>
+          <div id="start-exam-open-time" class="text-xs font-extrabold text-emerald-700 mt-1.5">Mở tự do</div>
+        </div>
+        <div class="bg-slate-50 rounded-2xl p-3 border border-slate-200/80 text-center">
+          <div class="text-[11px] font-semibold text-slate-500 uppercase">Kết thúc / Thu bài</div>
+          <div id="start-exam-deadline" class="text-xs font-extrabold text-rose-700 mt-1.5">Không giới hạn</div>
         </div>
       </div>
 
+      <div id="start-exam-resume-banner" class="hidden bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs sm:text-sm text-amber-950 space-y-1">
+        <div class="font-extrabold flex items-center gap-1.5"><span>🔄</span><span>Phát hiện tiến trình đang làm dở trên thiết bị này!</span></div>
+        <div id="start-exam-resume-detail">Bạn đã làm 0/22 câu. Bấm nút bên dưới để tiếp tục làm tiếp mà không mất đáp án cũ.</div>
+      </div>
+
+      <div id="start-exam-submitted-banner" class="hidden bg-emerald-50 border border-emerald-300 rounded-2xl p-4 text-xs sm:text-sm text-emerald-950 space-y-2">
+        <div class="font-extrabold flex items-center gap-1.5"><span>✅</span><span>Bài nộp của bạn đã được lưu trữ vĩnh viễn!</span></div>
+        <div id="start-exam-submitted-detail">Điểm số đã lưu: --</div>
+        <button id="btn-view-saved-submission" type="button" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
+          👁️ Xem Lại Bài Đã Nộp, Đáp Án &amp; BXH
+        </button>
+      </div>
+
       <div class="bg-blue-50/70 rounded-2xl p-4 border border-blue-100 text-xs text-slate-700 space-y-1.5">
-        <div class="font-bold text-blue-900">📌 Quy chế phòng thi:</div>
-        <div>• Hệ thống tự động tính giờ khi bạn bấm nút <strong>Bắt đầu làm bài</strong>.</div>
-        <div>• Nếu đề có giới hạn thời gian thu bài, bài làm sẽ tự động thu khi đến hạn.</div>
-        <div>• Đáp án chi tiết và Bảng xếp hạng sẽ mở khóa ngay sau khi bạn nộp bài.</div>
+        <div class="font-bold text-blue-900">📌 Quy chế phòng thi &amp; Tự động lưu:</div>
+        <div>• Tiến trình làm bài được <strong>tự động lưu liên tục</strong> — nếu lỡ thoát nhầm, vào lại vẫn làm tiếp đúng vị trí cũ.</div>
+        <div>• Bài đã nộp sẽ được <strong>lưu trữ vĩnh viễn</strong> cho mọi thí sinh kể cả sau khi thoát trình duyệt.</div>
+        <div>• Nếu đề có giới hạn thời gian mở/đóng, hệ thống chỉ cho vào khi đến giờ mở và tự động thu bài khi hết hạn.</div>
+      </div>
+
+      <div id="start-exam-not-open-alert" class="hidden bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs sm:text-sm font-bold text-amber-800 text-center">
+        ⏳ Chưa đến giờ mở đề. Hệ thống sẽ tự động mở khóa khi đến giờ!
       </div>
 
       <div id="start-exam-expired-alert" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs sm:text-sm font-bold text-rose-700 text-center">
@@ -462,7 +483,7 @@
       </div>
 
       <button id="btn-confirm-start-exam" type="button" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-blue-800 to-indigo-800 hover:from-blue-900 hover:to-indigo-900 text-white font-extrabold text-sm sm:text-base shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
-        <span>🚀 Bắt Đầu Làm Bài Ngay</span>
+        <span id="btn-confirm-start-label">🚀 Bắt Đầu Làm Bài Ngay</span>
       </button>
     </div>
   </section>
@@ -658,16 +679,16 @@
         </div>
       </div>
 
-      <!-- Exam Selector, Duration & Deadline Settings -->
+      <!-- Exam Selector, Duration, Open Time & Deadline Settings -->
       <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end bg-slate-50 p-4 rounded-2xl border border-slate-200">
-        <div class="md:col-span-3">
+        <div class="md:col-span-4">
           <label for="editor-exam-select" class="block text-xs font-bold text-slate-700 mb-1">
             Chọn bộ đề
           </label>
           <select id="editor-exam-select" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
           </select>
         </div>
-        <div class="md:col-span-4">
+        <div class="md:col-span-6">
           <label for="editor-exam-title" class="block text-xs font-bold text-slate-700 mb-1">
             Tên bộ đề thi
           </label>
@@ -679,10 +700,21 @@
           </label>
           <input id="editor-exam-duration" type="number" min="5" max="180" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
-        <div class="md:col-span-2">
+        <div class="md:col-span-5">
+          <div class="flex items-center justify-between mb-1">
+            <label for="editor-exam-open-time" class="block text-xs font-bold text-emerald-700">
+              🟢 Cho phép vào bài từ (tùy chọn)
+            </label>
+            <button id="btn-clear-open-time" type="button" class="text-[10px] font-bold text-slate-500 hover:text-emerald-700 transition" title="Xóa giờ mở đề (cho vào tự do)">
+              Xóa giờ mở
+            </button>
+          </div>
+          <input id="editor-exam-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div class="md:col-span-5">
           <div class="flex items-center justify-between mb-1">
             <label for="editor-exam-deadline" class="block text-xs font-bold text-rose-700">
-              Hạn thu bài
+              ⏰ Kết thúc / Hạn thu bài (tùy chọn)
             </label>
             <button id="btn-clear-deadline" type="button" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 transition" title="Xóa giới hạn thời gian thu bài">
               Xóa hạn
@@ -690,7 +722,7 @@
           </div>
           <input id="editor-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500" />
         </div>
-        <div class="md:col-span-1 flex gap-1">
+        <div class="md:col-span-2 flex gap-1">
           <button id="btn-save-exam-meta" type="button" class="w-full py-2 px-3 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
             Lưu
           </button>
@@ -802,14 +834,18 @@
           <label for="create-exam-title" class="block text-xs font-bold text-slate-700 mb-1">Tên đề thi mới</label>
           <input id="create-exam-title" type="text" placeholder="VD: Đề số 04 – Khảo sát HSG Toán 12" class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300" />
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label for="create-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng làm bài (phút)</label>
-            <input id="create-exam-duration" type="number" min="10" max="180" value="60" class="w-full text-sm font-bold px-3.5 py-2 rounded-xl border border-slate-300" />
+            <label for="create-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng (phút)</label>
+            <input id="create-exam-duration" type="number" min="10" max="180" value="60" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-slate-300" />
           </div>
           <div>
-            <label for="create-exam-deadline" class="block text-xs font-bold text-rose-700 mb-1">Hạn thu bài (tùy chọn)</label>
-            <input id="create-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-rose-300" />
+            <label for="create-exam-open-time" class="block text-xs font-bold text-emerald-700 mb-1">Mở bài từ</label>
+            <input id="create-exam-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300" />
+          </div>
+          <div>
+            <label for="create-exam-deadline" class="block text-xs font-bold text-rose-700 mb-1">Kết thúc / Thu bài</label>
+            <input id="create-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300" />
           </div>
         </div>
         <div>
@@ -824,6 +860,33 @@
       <div class="flex items-center justify-end gap-2 pt-2">
         <button id="btn-cancel-create-exam" type="button" class="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-300 text-slate-700">Hủy</button>
         <button id="btn-confirm-create-exam" type="button" class="px-4 py-2 text-xs font-bold rounded-xl bg-blue-800 hover:bg-blue-900 text-white">Tạo đề &amp; Mở trình sửa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Question Confirmation Modal (Admin Only) -->
+  <div id="delete-question-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4">
+    <div class="modal-animate bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">🗑️</span>
+          <h3 class="text-lg font-extrabold text-slate-900">Xác nhận xóa câu hỏi</h3>
+        </div>
+        <button id="btn-close-delete-question" type="button" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <p id="delete-question-summary-text" class="text-sm text-slate-600 leading-relaxed">
+        Bạn có chắc chắn muốn xóa câu hỏi này khỏi đề thi?
+      </p>
+      <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 text-xs text-amber-900">
+        ⚠️ Các câu hỏi còn lại sẽ tự động đánh số lại và Bảng xếp hạng sẽ được cập nhật đồng bộ ngay lập tức.
+      </div>
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button id="btn-cancel-delete-question" type="button" class="px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50">
+          Hủy
+        </button>
+        <button id="btn-confirm-delete-question" type="button" class="px-4 py-2 text-xs sm:text-sm font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm">
+          Xóa câu hỏi
+        </button>
       </div>
     </div>
   </div>
@@ -1238,6 +1301,7 @@
         examId: "de-01",
         title: "Đề số 01: Đề Tuyển Chọn HSG Toán 12 – Toán Thực Tế VDC (Chuẩn 22 câu)",
         durationMinutes: 90,
+        openTime: "",
         deadline: "",
         questions: cloneQuestions(null),
         leaderboard: []
@@ -1246,6 +1310,7 @@
         examId: "de-02",
         title: "Đề số 02: Đề Luyện Tốc Độ Chiến Thuật TDM – Dịch Trục & Cực Trị Tọa Độ Oxyz",
         durationMinutes: 45,
+        openTime: "",
         deadline: "",
         questions: cloneQuestions([1, 4, 5, 6, 8, 10, 13, 15, 17, 19, 20, 22]),
         leaderboard: []
@@ -1254,6 +1319,7 @@
         examId: "de-03",
         title: "Đề số 03: Đề Thực Chiến Tổ 2 – Tối Ưu Hóa Hình Học & Hệ Lực Không Gian",
         durationMinutes: 60,
+        openTime: "",
         deadline: "",
         questions: cloneQuestions([2, 3, 7, 9, 11, 12, 14, 16, 18, 20, 21, 22]),
         leaderboard: []
@@ -1261,7 +1327,168 @@
     ];
 
     const STORAGE_KEY = "azota_pro_portal_v3";
+    const SUBMISSIONS_ARCHIVE_KEY = "azota_pro_submissions_archive_v1";
+    const DRAFTS_STORAGE_KEY = "azota_pro_device_drafts_v1";
+    const USER_SESSION_KEY = "azota_pro_user_session_v1";
     const SYNC_CHANNEL_NAME = "azota_pro_sync_v3";
+
+    // =========================================================================
+    // UNLIMITED PERSISTENT STORAGE ENGINE (IndexedDB + localStorage fallback)
+    // =========================================================================
+    const ExamPersistenceDB = {
+      dbName: "PhongLuyenQuocAnhDB_v1",
+      db: null,
+      open() {
+        return new Promise((resolve) => {
+          if (this.db) return resolve(this.db);
+          if (!("indexedDB" in window)) return resolve(null);
+          try {
+            const req = indexedDB.open(this.dbName, 1);
+            req.onupgradeneeded = (ev) => {
+              const db = ev.target.result;
+              if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
+              if (!db.objectStoreNames.contains("submissions")) db.createObjectStore("submissions", { keyPath: "uid" });
+              if (!db.objectStoreNames.contains("drafts")) db.createObjectStore("drafts", { keyPath: "draftId" });
+            };
+            req.onsuccess = (ev) => {
+              this.db = ev.target.result;
+              resolve(this.db);
+            };
+            req.onerror = () => resolve(null);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      },
+      async putKV(key, val) {
+        const db = await this.open();
+        if (!db) return;
+        return new Promise((resolve) => {
+          try {
+            const tx = db.transaction("kv", "readwrite");
+            tx.objectStore("kv").put(val, key);
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          } catch (e) { resolve(false); }
+        });
+      },
+      async getKV(key) {
+        const db = await this.open();
+        if (!db) return null;
+        return new Promise((resolve) => {
+          try {
+            const tx = db.transaction("kv", "readonly");
+            const req = tx.objectStore("kv").get(key);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => resolve(null);
+          } catch (e) { resolve(null); }
+        });
+      },
+      async putSubmission(examId, entry) {
+        if (!examId || !entry || !entry.sbd) return;
+        const uid = `${examId}::${String(entry.sbd).toLowerCase()}`;
+        const record = { uid, examId, entry: JSON.parse(JSON.stringify(entry)), savedAt: Date.now() };
+        // 1. Save to IndexedDB (unlimited capacity for thousands of participants)
+        const db = await this.open();
+        if (db) {
+          try {
+            const tx = db.transaction("submissions", "readwrite");
+            tx.objectStore("submissions").put(record);
+          } catch (e) {}
+        }
+        // 2. Also mirror to localStorage archive for instant synchronous reads on reload
+        try {
+          const raw = localStorage.getItem(SUBMISSIONS_ARCHIVE_KEY);
+          const map = raw ? JSON.parse(raw) : {};
+          map[uid] = record;
+          localStorage.setItem(SUBMISSIONS_ARCHIVE_KEY, JSON.stringify(map));
+        } catch (e) {}
+      },
+      async getAllSubmissions() {
+        const results = new Map();
+        try {
+          const raw = localStorage.getItem(SUBMISSIONS_ARCHIVE_KEY);
+          if (raw) {
+            const map = JSON.parse(raw);
+            Object.values(map).forEach((rec) => {
+              if (rec && rec.uid) results.set(rec.uid, rec);
+            });
+          }
+        } catch (e) {}
+        const db = await this.open();
+        if (db) {
+          await new Promise((resolve) => {
+            try {
+              const tx = db.transaction("submissions", "readonly");
+              const req = tx.objectStore("submissions").getAll();
+              req.onsuccess = () => {
+                (req.result || []).forEach((rec) => {
+                  if (!rec || !rec.uid) return;
+                  const existing = results.get(rec.uid);
+                  if (!existing || (rec.savedAt || 0) >= (existing.savedAt || 0)) {
+                    results.set(rec.uid, rec);
+                  }
+                });
+                resolve();
+              };
+              req.onerror = () => resolve();
+            } catch (e) { resolve(); }
+          });
+        }
+        return Array.from(results.values());
+      },
+      saveDraftSync(draft) {
+        if (!draft || !draft.examId) return;
+        const draftId = `${draft.examId}::${String(draft.sbd || "device_user").toLowerCase()}`;
+        const record = { ...draft, draftId, savedAt: Date.now() };
+        try {
+          const raw = localStorage.getItem(DRAFTS_STORAGE_KEY);
+          const map = raw ? JSON.parse(raw) : {};
+          map[draftId] = record;
+          map["__latest_active__"] = record;
+          localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(map));
+        } catch (e) {}
+        this.open().then((db) => {
+          if (!db) return;
+          try {
+            const tx = db.transaction("drafts", "readwrite");
+            tx.objectStore("drafts").put(record);
+            tx.objectStore("drafts").put({ ...record, draftId: "__latest_active__" });
+          } catch (e) {}
+        });
+      },
+      getDraftSync(examId, sbd) {
+        try {
+          const raw = localStorage.getItem(DRAFTS_STORAGE_KEY);
+          if (!raw) return null;
+          const map = JSON.parse(raw);
+          if (examId && sbd) {
+            const exact = map[`${examId}::${String(sbd).toLowerCase()}`];
+            if (exact) return exact;
+          }
+          if (examId) {
+            // Find any draft for this exam on this device
+            const foundKey = Object.keys(map).find((k) => k !== "__latest_active__" && k.startsWith(`${examId}::`));
+            if (foundKey) return map[foundKey];
+          }
+          return map["__latest_active__"] || null;
+        } catch (e) {
+          return null;
+        }
+      },
+      clearDraftSync(examId, sbd) {
+        try {
+          const raw = localStorage.getItem(DRAFTS_STORAGE_KEY);
+          if (!raw) return;
+          const map = JSON.parse(raw);
+          if (examId && sbd) delete map[`${examId}::${String(sbd).toLowerCase()}`];
+          if (map["__latest_active__"] && map["__latest_active__"].examId === examId) {
+            delete map["__latest_active__"];
+          }
+          localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(map));
+        } catch (e) {}
+      }
+    };
 
     let state = {
       accounts: [], // Xóa toàn bộ tài khoản học sinh ảo, chỉ giáo viên thêm khi cần
@@ -1311,10 +1538,119 @@
       return state.exams.find((e) => e.examId === state.editorExamId) || state.exams[0];
     }
 
+    function isExamNotYetOpen(ex) {
+      if (!ex || !ex.openTime) return false;
+      const op = new Date(ex.openTime).getTime();
+      return !isNaN(op) && Date.now() < op;
+    }
+
     function isExamExpired(ex) {
       if (!ex || !ex.deadline) return false;
       const dl = new Date(ex.deadline).getTime();
       return !isNaN(dl) && Date.now() > dl;
+    }
+
+    function persistUserSession() {
+      try {
+        if (state.isLoggedIn && state.currentUser && state.currentUser.name) {
+          localStorage.setItem(USER_SESSION_KEY, JSON.stringify({
+            currentUser: state.currentUser,
+            activeExamId: state.activeExamId,
+            activeView: state.activeView,
+            isDirectLinkMode: state.isDirectLinkMode,
+            savedAt: Date.now()
+          }));
+        }
+      } catch (e) {}
+    }
+
+    function loadSavedUserSession() {
+      try {
+        const raw = localStorage.getItem(USER_SESSION_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    function saveExamDraftToDevice() {
+      if (!state.isLoggedIn || state.currentUser.role === "admin") return;
+      const ex = getActiveExam();
+      if (!ex) return;
+      if (state.activeView !== "exam" && !state.submitted) return;
+      ExamPersistenceDB.saveDraftSync({
+        examId: ex.examId,
+        sbd: state.currentUser.sbd || "device_user",
+        name: state.currentUser.name || "Thí sinh",
+        mcAnswers: state.mcAnswers,
+        tfAnswers: state.tfAnswers,
+        saAnswers: state.saAnswers,
+        flagged: state.flagged,
+        secondsLeft: state.secondsLeft,
+        submitted: state.submitted,
+        savedAt: Date.now()
+      });
+    }
+
+    function restoreExamFromDraft(draft, autoEnterExamView) {
+      if (!draft || !draft.examId) return false;
+      const ex = state.exams.find((e) => e.examId === draft.examId);
+      if (!ex) return false;
+      state.activeExamId = ex.examId;
+      syncActiveExamIntoWorkspace(true);
+
+      state.mcAnswers = JSON.parse(JSON.stringify(draft.mcAnswers || {}));
+      state.tfAnswers = JSON.parse(JSON.stringify(draft.tfAnswers || {}));
+      state.saAnswers = JSON.parse(JSON.stringify(draft.saAnswers || {}));
+      state.flagged = JSON.parse(JSON.stringify(draft.flagged || {}));
+
+      if (draft.submitted) {
+        // Restore submitted state cleanly without re-creating duplicate submission
+        state.submitted = true;
+        state.timerPaused = true;
+        state.showAllSolutions = true;
+        state.secondsLeft = Math.max(0, Number(draft.secondsLeft) || 0);
+        const mins = String(Math.floor(state.secondsLeft / 60)).padStart(2, "0");
+        const secs = String(state.secondsLeft % 60).padStart(2, "0");
+        document.getElementById("timer-display").textContent = `${mins}:${secs}`;
+        const mySbd = (state.currentUser.sbd || draft.sbd || "").toLowerCase();
+        const myEntry = ex.leaderboard.find((item) => item.sbd && item.sbd.toLowerCase() === mySbd);
+        const myRank = ex.leaderboard.findIndex((item) => item.sbd && item.sbd.toLowerCase() === mySbd) + 1;
+        if (myEntry) {
+          document.getElementById("score-banner").classList.remove("hidden");
+          document.getElementById("result-headline").textContent = `${myEntry.name} — Điểm: ${myEntry.total.toFixed(2).replace(".", ",")}đ`;
+          document.getElementById("user-rank-pill").textContent = `Hạng #${myRank || 1} / ${ex.leaderboard.length}`;
+          document.getElementById("result-subtext").textContent = `Bài nộp đã được lưu trữ vĩnh viễn • Đề: ${ex.title} • Thời gian: ${formatDuration(myEntry.timeSeconds)}`;
+          document.getElementById("score-part1").textContent = `${myEntry.p1.toFixed(2).replace(".", ",")}đ`;
+          document.getElementById("score-part2").textContent = `${myEntry.p2.toFixed(2).replace(".", ",")}đ`;
+          document.getElementById("score-part3").textContent = `${myEntry.p3.toFixed(2).replace(".", ",")}đ`;
+          renderLeaderboardTable();
+        }
+        document.getElementById("lock-solutions-badge").classList.add("hidden");
+        document.getElementById("btn-toggle-all-solutions").classList.remove("hidden");
+        document.getElementById("btn-toggle-all-solutions").textContent = "Đang hiện đáp án & Gợi ý";
+        document.getElementById("btn-open-submit").classList.add("hidden");
+        document.getElementById("btn-reset-exam").classList.remove("hidden");
+        if (autoEnterExamView) switchMainView("exam");
+        return true;
+      }
+
+      // Restore in-progress exam with elapsed wall-clock adjustment
+      const elapsedSec = Math.max(0, Math.floor((Date.now() - (draft.savedAt || Date.now())) / 1000));
+      state.secondsLeft = Math.max(0, (Number(draft.secondsLeft) || ex.durationMinutes * 60) - elapsedSec);
+      const mins = String(Math.floor(state.secondsLeft / 60)).padStart(2, "0");
+      const secs = String(state.secondsLeft % 60).padStart(2, "0");
+      document.getElementById("timer-display").textContent = `${mins}:${secs}`;
+
+      if (autoEnterExamView) {
+        switchMainView("exam");
+        if (isExamExpired(ex) || state.secondsLeft <= 0) {
+          gradeAndShowResults("Hết giờ trong lúc thoát trang — hệ thống tự động thu bài & lưu kết quả");
+        } else {
+          let ansCnt = 0;
+          state.questions.forEach((q) => { if (isQuestionAnswered(q)) ansCnt++; });
+          showToast(`🔄 Đã khôi phục tiến trình làm bài (${ansCnt}/${state.questions.length} câu • còn ${mins}:${secs})!`);
+        }
+      }
+      return true;
     }
 
     function formatDeadlineVi(deadlineStr) {
@@ -1854,6 +2190,7 @@
       if (!pkt || !pkt.examId || !pkt.entry || !pkt.entry.sbd) return;
       const ex = state.exams.find((e) => e.examId === pkt.examId);
       if (!ex) return;
+      ExamPersistenceDB.putSubmission(pkt.examId, pkt.entry);
       ex.leaderboard = mergeLeaderboards(ex.leaderboard, [pkt.entry], ex.questions);
       if (state.activeExamId === ex.examId) {
         state.leaderboard = ex.leaderboard;
@@ -1903,6 +2240,7 @@
           examId: ex.examId,
           title: ex.title,
           durationMinutes: ex.durationMinutes,
+          openTime: ex.openTime || "",
           deadline: ex.deadline || "",
           questions: compactQuestions,
           leaderboard: ex.leaderboard || []
@@ -2186,6 +2524,13 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
       } catch (e) {}
+      ExamPersistenceDB.putKV("portal_state", payload);
+      // Persist all leaderboard entries into unlimited IndexedDB submissions store
+      state.exams.forEach((ex) => {
+        (ex.leaderboard || []).forEach((entry) => {
+          ExamPersistenceDB.putSubmission(ex.examId, entry);
+        });
+      });
       if (broadcastCh) {
         try {
           broadcastCh.postMessage(payload);
@@ -2215,6 +2560,42 @@
             state.latestSubmissionEvent = parsed.latestSubmissionEvent;
             lastSeenSubmissionId = parsed.latestSubmissionEvent.id || "";
           }
+        }
+      } catch (e) {}
+      // Synchronously merge any archived submissions from localStorage backup immediately
+      try {
+        const subRaw = localStorage.getItem(SUBMISSIONS_ARCHIVE_KEY);
+        if (subRaw) {
+          const map = JSON.parse(subRaw);
+          Object.values(map).forEach((rec) => {
+            if (!rec || !rec.examId || !rec.entry) return;
+            const ex = state.exams.find((e) => e.examId === rec.examId);
+            if (ex) ex.leaderboard = mergeLeaderboards(ex.leaderboard, [rec.entry], ex.questions);
+          });
+        }
+      } catch (e) {}
+    }
+
+    async function hydrateFromIndexedDB() {
+      try {
+        const savedPortal = await ExamPersistenceDB.getKV("portal_state");
+        if (savedPortal && (savedPortal.updatedAt || 0) > (state.updatedAt || 0)) {
+          applySyncedPayload(savedPortal);
+        }
+        const allSubs = await ExamPersistenceDB.getAllSubmissions();
+        let mergedAny = false;
+        allSubs.forEach((rec) => {
+          if (!rec || !rec.examId || !rec.entry) return;
+          const ex = state.exams.find((e) => e.examId === rec.examId);
+          if (ex) {
+            const beforeLen = ex.leaderboard.length;
+            ex.leaderboard = mergeLeaderboards(ex.leaderboard, [rec.entry], ex.questions);
+            if (ex.leaderboard.length !== beforeLen) mergedAny = true;
+          }
+        });
+        if (mergedAny) {
+          if (state.activeView === "hub") renderHubView();
+          else if (state.activeView === "exam" && state.submitted) renderLeaderboardTable();
         }
       } catch (e) {}
     }
@@ -2371,6 +2752,7 @@
           examId: ex.examId,
           title: ex.title,
           durationMinutes: ex.durationMinutes,
+          openTime: ex.openTime || "",
           deadline: ex.deadline || "",
           questions: compactQs,
           examsModifiedAt: state.examsModifiedAt || Date.now()
@@ -2406,6 +2788,7 @@
           examId: snap.examId,
           title: snap.title,
           durationMinutes: snap.durationMinutes || 60,
+          openTime: snap.openTime || "",
           deadline: snap.deadline || "",
           questions: fullQs,
           leaderboard: [],
@@ -2429,6 +2812,27 @@
         hash += `&snap=${encodeURIComponent(snapStr)}`;
       }
       return `${base}${hash}`;
+    }
+
+    let pendingDeleteQuestion = null;
+
+    function openDeleteQuestionModal(examId, questionId) {
+      if (state.currentUser.role !== "admin") {
+        showToast("Chỉ Giáo viên mới có quyền xóa câu hỏi!");
+        return;
+      }
+      const ex = state.exams.find((e) => e.examId === examId);
+      if (!ex) return;
+      if (ex.questions.length <= 1) {
+        showToast("Đề thi cần giữ lại ít nhất 1 câu hỏi!");
+        return;
+      }
+      pendingDeleteQuestion = { examId, questionId };
+      document.getElementById("delete-question-summary-text").innerHTML =
+        `Bạn có chắc chắn muốn xóa <strong>Câu ${questionId}</strong> khỏi đề <strong>"${ex.title}"</strong> không?`;
+      const modal = document.getElementById("delete-question-modal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
     }
 
     let pendingDeleteExamId = null;
@@ -2562,29 +2966,89 @@
     function renderStartExamView() {
       const ex = getActiveExam();
       if (!ex) return;
+      const notOpen = isExamNotYetOpen(ex);
       const expired = isExamExpired(ex);
+
       document.getElementById("start-exam-title").textContent = ex.title;
       document.getElementById("start-exam-student-name").textContent = state.currentUser.name || "Thí sinh";
       document.getElementById("start-exam-duration").textContent = `${ex.durationMinutes} phút`;
       document.getElementById("start-exam-qcount").textContent = `${ex.questions.length} câu`;
+      document.getElementById("start-exam-open-time").textContent = ex.openTime ? formatDeadlineVi(ex.openTime) : "Mở tự do";
       document.getElementById("start-exam-deadline").textContent = formatDeadlineVi(ex.deadline);
 
       const badge = document.getElementById("start-exam-badge");
+      const notOpenAlert = document.getElementById("start-exam-not-open-alert");
       const expiredAlert = document.getElementById("start-exam-expired-alert");
+      const resumeBanner = document.getElementById("start-exam-resume-banner");
+      const submittedBanner = document.getElementById("start-exam-submitted-banner");
       const startBtn = document.getElementById("btn-confirm-start-exam");
+      const startLabel = document.getElementById("btn-confirm-start-label");
 
-      if (expired) {
+      // Check saved draft or saved submission on this device
+      const draft = ExamPersistenceDB.getDraftSync(ex.examId, state.currentUser.sbd);
+      const mySbd = (state.currentUser.sbd || "").toLowerCase();
+      const savedLbEntry = mySbd ? ex.leaderboard.find((item) => item.sbd && item.sbd.toLowerCase() === mySbd) : null;
+
+      if (savedLbEntry || (draft && draft.submitted)) {
+        submittedBanner.classList.remove("hidden");
+        resumeBanner.classList.add("hidden");
+        const scVal = savedLbEntry ? savedLbEntry.total.toFixed(2).replace(".", ",") : "--";
+        document.getElementById("start-exam-submitted-detail").textContent =
+          `Điểm số đã lưu trữ: ${scVal}đ • Thời gian: ${savedLbEntry ? formatDuration(savedLbEntry.timeSeconds) : "--"}`;
+      } else if (draft && !draft.submitted && !expired && !notOpen) {
+        submittedBanner.classList.add("hidden");
+        resumeBanner.classList.remove("hidden");
+        let ansCnt = 0;
+        const mc = draft.mcAnswers || {}, tf = draft.tfAnswers || {}, sa = draft.saAnswers || {};
+        ex.questions.forEach((q) => {
+          if (q.part === 1 && mc[q.id] !== undefined) ansCnt++;
+          else if (q.part === 2 && tf[q.id] && Object.keys(tf[q.id]).length > 0) ansCnt++;
+          else if (q.part === 3 && (sa[q.id] || "").trim().length > 0) ansCnt++;
+        });
+        const elapsed = Math.max(0, Math.floor((Date.now() - (draft.savedAt || Date.now())) / 1000));
+        const rem = Math.max(0, (Number(draft.secondsLeft) || ex.durationMinutes * 60) - elapsed);
+        const mm = String(Math.floor(rem / 60)).padStart(2, "0");
+        const ss = String(rem % 60).padStart(2, "0");
+        document.getElementById("start-exam-resume-detail").textContent =
+          `Bạn đã làm ${ansCnt}/${ex.questions.length} câu • Thời gian còn lại: ${mm}:${ss}. Bấm bên dưới để làm tiếp!`;
+      } else {
+        submittedBanner.classList.add("hidden");
+        resumeBanner.classList.add("hidden");
+      }
+
+      if (notOpen) {
+        const diffSec = Math.max(0, Math.ceil((new Date(ex.openTime).getTime() - Date.now()) / 1000));
+        const hh = Math.floor(diffSec / 3600);
+        const mm = Math.floor((diffSec % 3600) / 60);
+        const ss = diffSec % 60;
+        badge.textContent = "CHƯA ĐẾN GIỜ MỞ ĐỀ";
+        badge.className = "inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-800";
+        notOpenAlert.textContent = `⏳ Chưa đến giờ vào làm bài. Đề sẽ tự động mở lúc ${formatDeadlineVi(ex.openTime)} (còn ${hh}g ${mm}p ${ss}s).`;
+        notOpenAlert.classList.remove("hidden");
+        expiredAlert.classList.add("hidden");
+        startBtn.disabled = true;
+        startBtn.classList.add("opacity-50", "cursor-not-allowed");
+        startLabel.textContent = "⏳ Chưa đến giờ mở đề";
+      } else if (expired) {
         badge.textContent = "ĐÃ HẾT HẠN THU BÀI";
         badge.className = "inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-rose-100 text-rose-800";
+        notOpenAlert.classList.add("hidden");
         expiredAlert.classList.remove("hidden");
         startBtn.disabled = true;
         startBtn.classList.add("opacity-50", "cursor-not-allowed");
+        startLabel.textContent = "⛔ Đã hết hạn thu bài";
       } else {
-        badge.textContent = "SẴN SÀNG LÀM BÀI";
-        badge.className = "inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800";
+        badge.textContent = (draft && !draft.submitted) ? "ĐANG LÀM DỞ" : "SẴN SÀNG LÀM BÀI";
+        badge.className = (draft && !draft.submitted)
+          ? "inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-800"
+          : "inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800";
+        notOpenAlert.classList.add("hidden");
         expiredAlert.classList.add("hidden");
         startBtn.disabled = false;
         startBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        startLabel.textContent = (draft && !draft.submitted)
+          ? "🔄 Tiếp Tục Tiến Trình Đang Làm"
+          : (savedLbEntry ? "📝 Làm Lại Đề Mới" : "🚀 Bắt Đầu Làm Bài Ngay");
       }
     }
 
@@ -2614,18 +3078,27 @@
       }
 
       state.exams.forEach((ex, idx) => {
+        const notOpen = isExamNotYetOpen(ex);
         const expired = isExamExpired(ex);
         const p1Count = ex.questions.filter((q) => q.part === 1).length;
         const p2Count = ex.questions.filter((q) => q.part === 2).length;
         const p3Count = ex.questions.filter((q) => q.part === 3).length;
         const maxScore = (p1Count * 0.25 + p2Count * 1.0 + p3Count * 0.5).toFixed(2).replace(".", ",");
 
+        const openTimeBadge = ex.openTime
+          ? `<span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full ${
+              notOpen
+                ? "bg-amber-100 text-amber-800 border border-amber-300"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            }">🟢 Mở từ: ${formatDeadlineVi(ex.openTime)}</span>`
+          : "";
+
         const deadlineBadge = ex.deadline
           ? `<span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full ${
               expired
                 ? "bg-rose-100 text-rose-800 border border-rose-200"
                 : "bg-orange-50 text-orange-800 border border-orange-200"
-            }">⏰ ${expired ? "Đã hết hạn: " : "Thu bài trước: "}${formatDeadlineVi(ex.deadline)}</span>`
+            }">⏰ ${expired ? "Đã hết hạn: " : "Kết thúc: "}${formatDeadlineVi(ex.deadline)}</span>`
           : "";
 
         const adminActionsHtml = isAdmin
@@ -2658,7 +3131,7 @@
                 <span class="px-2.5 py-0.5 text-[11px] font-semibold rounded-full bg-emerald-50 text-emerald-800">
                   🏆 ${ex.leaderboard.length} bài nộp
                 </span>
-                ${deadlineBadge}
+                ${openTimeBadge}${deadlineBadge}
               </div>
               <h3 class="text-sm sm:text-base font-extrabold text-slate-900">${ex.title}</h3>
               <p class="text-xs text-slate-500">
@@ -2668,9 +3141,9 @@
 
             <div class="flex sm:flex-col gap-2 shrink-0">
               <button type="button" class="btn-start-this-exam px-4 py-2 rounded-xl ${
-                expired ? "bg-slate-400 cursor-not-allowed" : "bg-blue-800 hover:bg-blue-900"
+                expired ? "bg-slate-400" : notOpen ? "bg-amber-600 hover:bg-amber-700" : "bg-blue-800 hover:bg-blue-900"
               } text-white text-xs font-bold shadow-sm transition whitespace-nowrap">
-                ${expired ? "Đã hết hạn thu bài" : "Bắt đầu làm bài →"}
+                ${expired ? "Đã hết hạn thu bài" : notOpen ? "⏳ Chưa đến giờ mở" : "Bắt đầu làm bài →"}
               </button>
               <div class="flex gap-1.5">
                 <button type="button" class="btn-view-this-lb flex-1 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-[11px] font-semibold transition">
@@ -2815,6 +3288,7 @@
       document.getElementById("progress-bar-fill").style.width = `${pct}%`;
 
       if (state.isLoggedIn && state.activeView === "exam" && !state.submitted && state.currentUser.role !== "admin") {
+        saveExamDraftToDevice();
         const prevAnswered = state._lastSyncedAnsweredCount;
         if (prevAnswered !== answeredCount) {
           state._lastSyncedAnsweredCount = answeredCount;
@@ -3195,6 +3669,9 @@
         timestamp: Date.now()
       };
       state.broadcastLeaderboardExamId = ex.examId;
+      // Permanently store submission in unlimited IndexedDB + localStorage archive + mark device draft as submitted
+      ExamPersistenceDB.putSubmission(ex.examId, entry);
+      saveExamDraftToDevice();
       publishShardedStudentSubmission(ex.examId, entry, state.latestSubmissionEvent);
       saveAndSyncAllDevices(false);
       document.getElementById("score-banner").classList.remove("hidden");
@@ -3268,6 +3745,7 @@
       }
       document.getElementById("editor-exam-title").value = ex.title;
       document.getElementById("editor-exam-duration").value = ex.durationMinutes;
+      document.getElementById("editor-exam-open-time").value = ex.openTime || "";
       document.getElementById("editor-exam-deadline").value = ex.deadline || "";
       document.getElementById("cfg-sync-room-id").value = state.syncRoomCode || "PHONG-QUOC-ANH";
 
@@ -3333,9 +3811,14 @@
               <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs">Câu ${q.id}</span>
               <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold">${partName}</span>
             </div>
-            <button type="button" class="btn-save-q-changes px-3.5 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
-              💾 Lưu &amp; Đồng bộ câu ${q.id}
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" class="btn-save-q-changes px-3.5 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
+                💾 Lưu &amp; Đồng bộ câu ${q.id}
+              </button>
+              <button type="button" class="btn-delete-q px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition" title="Xóa câu hỏi này khỏi đề">
+                🗑️ Xóa câu
+              </button>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Nội dung đề bài:</label>
@@ -3389,6 +3872,10 @@
           saveAndSyncAllDevices();
           renderEditorView();
           showToast(`Đã lưu & đồng bộ Câu ${q.id} tới mọi thiết bị!`);
+        });
+
+        card.querySelector(".btn-delete-q").addEventListener("click", () => {
+          openDeleteQuestionModal(ex.examId, q.id);
         });
 
         qList.appendChild(card);
@@ -3475,6 +3962,10 @@
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
+        if (state.activeView === "start") {
+          const exStart = getActiveExam();
+          if (exStart && exStart.openTime) renderStartExamView();
+        }
         if (state.timerPaused || state.submitted || !state.isLoggedIn || state.activeView !== "exam") return;
         const ex = getActiveExam();
         if (ex && isExamExpired(ex)) {
@@ -3486,6 +3977,9 @@
           const mins = String(Math.floor(state.secondsLeft / 60)).padStart(2, "0");
           const secs = String(state.secondsLeft % 60).padStart(2, "0");
           document.getElementById("timer-display").textContent = `${mins}:${secs}`;
+          if (state.secondsLeft % 2 === 0) {
+            saveExamDraftToDevice();
+          }
         } else {
           gradeAndShowResults("Hết giờ làm bài");
         }
@@ -3642,6 +4136,7 @@
         loginErr.classList.add("hidden");
         state.isLoggedIn = true;
         state.currentUser = { name: fullName, sbd: sbd, role: role };
+        persistUserSession();
 
         document.getElementById("student-name").value = fullName;
         document.getElementById("header-user-badge").textContent =
@@ -3685,16 +4180,54 @@
       document.getElementById("btn-start-back-hub").addEventListener("click", () => switchMainView("hub"));
       document.getElementById("btn-confirm-start-exam").addEventListener("click", () => {
         const ex = getActiveExam();
+        if (isExamNotYetOpen(ex)) {
+          showToast(`Chưa đến giờ mở đề (${formatDeadlineVi(ex.openTime)})!`);
+          return;
+        }
         if (isExamExpired(ex)) {
           showToast("Đề thi đã hết hạn thu bài!");
           return;
         }
+        const existingDraft = ExamPersistenceDB.getDraftSync(ex.examId, state.currentUser.sbd);
+        if (existingDraft && !existingDraft.submitted) {
+          restoreExamFromDraft(existingDraft, true);
+          persistUserSession();
+          updateMyLiveSession("taking");
+          saveAndSyncAllDevices(false);
+          return;
+        }
+        ExamPersistenceDB.clearDraftSync(ex.examId, state.currentUser.sbd);
         syncActiveExamIntoWorkspace(true);
         state._lastSyncedAnsweredCount = 0;
+        switchMainView("exam");
+        saveExamDraftToDevice();
+        persistUserSession();
         updateMyLiveSession("taking");
         saveAndSyncAllDevices(false);
-        switchMainView("exam");
         showToast(`Bắt đầu tính giờ làm bài (${ex.durationMinutes} phút)!`);
+      });
+
+      document.getElementById("btn-view-saved-submission").addEventListener("click", () => {
+        const ex = getActiveExam();
+        if (!ex) return;
+        const draft = ExamPersistenceDB.getDraftSync(ex.examId, state.currentUser.sbd);
+        const mySbd = (state.currentUser.sbd || "").toLowerCase();
+        const savedEntry = mySbd ? ex.leaderboard.find((item) => item.sbd && item.sbd.toLowerCase() === mySbd) : null;
+        if (draft && draft.submitted) {
+          restoreExamFromDraft(draft, true);
+        } else if (savedEntry) {
+          restoreExamFromDraft({
+            examId: ex.examId,
+            sbd: savedEntry.sbd,
+            name: savedEntry.name,
+            mcAnswers: savedEntry.rawAnswers ? savedEntry.rawAnswers.mc : {},
+            tfAnswers: savedEntry.rawAnswers ? savedEntry.rawAnswers.tf : {},
+            saAnswers: savedEntry.rawAnswers ? savedEntry.rawAnswers.sa : {},
+            flagged: {},
+            secondsLeft: Math.max(0, ex.durationMinutes * 60 - (savedEntry.timeSeconds || 0)),
+            submitted: true
+          }, true);
+        }
       });
 
       document.getElementById("btn-result-back-hub").addEventListener("click", () => switchMainView("hub"));
@@ -3760,14 +4293,31 @@
         const ex = getEditorExam();
         const newTitle = document.getElementById("editor-exam-title").value.trim();
         const newDur = Math.max(5, Math.min(180, Number(document.getElementById("editor-exam-duration").value) || 60));
+        const newOpenTime = document.getElementById("editor-exam-open-time").value || "";
         const newDeadline = document.getElementById("editor-exam-deadline").value || "";
+        if (newOpenTime && newDeadline && new Date(newOpenTime).getTime() >= new Date(newDeadline).getTime()) {
+          showToast("Giờ mở đề phải sớm hơn giờ kết thúc thu bài!");
+          return;
+        }
         if (newTitle) ex.title = newTitle;
         ex.durationMinutes = newDur;
+        ex.openTime = newOpenTime;
         ex.deadline = newDeadline;
         if (state.activeExamId === ex.examId) syncActiveExamIntoWorkspace(!state.submitted);
         saveAndSyncAllDevices();
         renderEditorView();
-        showToast(`Đã lưu & đồng bộ cài đặt đề (${newDur} phút)!`);
+        showToast(`Đã lưu & đồng bộ lịch mở/đóng đề (${newDur} phút)!`);
+      });
+
+      document.getElementById("btn-clear-open-time").addEventListener("click", () => {
+        document.getElementById("editor-exam-open-time").value = "";
+        const ex = getEditorExam();
+        if (ex) {
+          ex.openTime = "";
+          if (state.activeExamId === ex.examId) syncActiveExamIntoWorkspace(!state.submitted);
+          saveAndSyncAllDevices();
+          showToast("Đã xóa giờ mở đề (học sinh có thể vào tự do)!");
+        }
       });
 
       document.getElementById("btn-editor-add-question").addEventListener("click", () => {
@@ -3790,6 +4340,7 @@
         if (state.currentUser.role !== "admin") return;
         document.getElementById("create-exam-title").value =
           `Đề số ${String(state.exams.length + 1).padStart(2, "0")}: Đề Luyện HSG Toán 12`;
+        document.getElementById("create-exam-open-time").value = "";
         document.getElementById("create-exam-deadline").value = "";
         createExamModal.classList.remove("hidden");
         createExamModal.classList.add("flex");
@@ -3801,6 +4352,29 @@
       document.getElementById("btn-create-exam-modal").addEventListener("click", openCreateExamModal);
       document.getElementById("btn-hub-open-create-exam").addEventListener("click", openCreateExamModal);
       document.getElementById("btn-editor-new-exam").addEventListener("click", openCreateExamModal);
+      // Delete Question Modal wiring
+      const deleteQModal = document.getElementById("delete-question-modal");
+      const closeDeleteQModal = () => {
+        deleteQModal.classList.add("hidden");
+        deleteQModal.classList.remove("flex");
+        pendingDeleteQuestion = null;
+      };
+      document.getElementById("btn-close-delete-question").addEventListener("click", closeDeleteQModal);
+      document.getElementById("btn-cancel-delete-question").addEventListener("click", closeDeleteQModal);
+      document.getElementById("btn-confirm-delete-question").addEventListener("click", () => {
+        if (!pendingDeleteQuestion || state.currentUser.role !== "admin") return;
+        const ex = state.exams.find((e) => e.examId === pendingDeleteQuestion.examId);
+        if (!ex) return;
+        const removedId = pendingDeleteQuestion.questionId;
+        ex.questions = ex.questions.filter((q) => q.id !== removedId).map((q, idx) => ({ ...q, id: idx + 1 }));
+        regradeExamLeaderboard(ex);
+        if (state.activeExamId === ex.examId) syncActiveExamIntoWorkspace(false);
+        saveAndSyncAllDevices(true);
+        closeDeleteQModal();
+        renderEditorView();
+        showToast(`🗑️ Đã xóa Câu ${removedId} và đồng bộ đề mới trên mọi thiết bị!`);
+      });
+
       // Delete Exam Modal wiring
       const deleteExamModal = document.getElementById("delete-exam-modal");
       const closeDeleteExamModal = () => {
@@ -3847,6 +4421,7 @@
       document.getElementById("btn-confirm-create-exam").addEventListener("click", () => {
         const title = document.getElementById("create-exam-title").value.trim() || `Đề số ${state.exams.length + 1}`;
         const dur = Math.max(5, Math.min(180, Number(document.getElementById("create-exam-duration").value) || 60));
+        const openTime = document.getElementById("create-exam-open-time").value || "";
         const deadline = document.getElementById("create-exam-deadline").value || "";
         const tpl = document.getElementById("create-exam-template").value;
         let subset = null;
@@ -3858,6 +4433,7 @@
           examId: newExamId,
           title: title,
           durationMinutes: dur,
+          openTime: openTime,
           deadline: deadline,
           questions: cloneQuestions(subset),
           leaderboard: []
@@ -4062,10 +4638,15 @@
 
       document.getElementById("btn-reset-exam").addEventListener("click", () => {
         const ex = getActiveExam();
+        if (isExamNotYetOpen(ex)) {
+          showToast("Chưa đến giờ mở đề!");
+          return;
+        }
         if (isExamExpired(ex)) {
           showToast("Đã hết hạn thu bài, không thể làm lại!");
           return;
         }
+        ExamPersistenceDB.clearDraftSync(ex.examId, state.currentUser.sbd);
         syncActiveExamIntoWorkspace(true);
         state.timerPaused = false;
         document.getElementById("btn-toggle-timer").textContent = "Tạm dừng";
@@ -4073,6 +4654,58 @@
         showToast("Đã làm mới bài thi!");
       });
 
+      // Flush draft synchronously before browser tab closes or switches away
+      window.addEventListener("beforeunload", () => {
+        saveExamDraftToDevice();
+        persistUserSession();
+      });
+      window.addEventListener("pagehide", () => {
+        saveExamDraftToDevice();
+        persistUserSession();
+      });
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          saveExamDraftToDevice();
+          persistUserSession();
+        }
+      });
+
+      // Auto-restore saved user session & accidental-exit exam progress on this device!
+      const savedSess = loadSavedUserSession();
+      const latestDraft = ExamPersistenceDB.getDraftSync(
+        directExamFromHash ? directExamFromHash.examId : (savedSess ? savedSess.activeExamId : null),
+        savedSess && savedSess.currentUser ? savedSess.currentUser.sbd : null
+      );
+
+      if (savedSess && savedSess.currentUser && savedSess.currentUser.name) {
+        const isSwitchingToDifferentDirectExam = directExamFromHash && latestDraft && latestDraft.examId !== directExamFromHash.examId;
+        if (!isSwitchingToDifferentDirectExam) {
+          state.currentUser = savedSess.currentUser;
+          state.isLoggedIn = true;
+          document.getElementById("student-name").value = state.currentUser.name;
+          document.getElementById("header-user-badge").textContent =
+            state.currentUser.role === "admin" ? `🔑 GV: ${state.currentUser.name}` : `🎓 ${state.currentUser.name}`;
+          loginGate.classList.add("hidden");
+          loginGate.classList.remove("flex");
+          updateRoleUI();
+
+          if (state.currentUser.role !== "admin" && latestDraft && !latestDraft.submitted) {
+            restoreExamFromDraft(latestDraft, true);
+          } else if (state.currentUser.role !== "admin" && latestDraft && latestDraft.submitted && savedSess.activeView === "exam") {
+            restoreExamFromDraft(latestDraft, true);
+          } else if (directExamFromHash && state.currentUser.role !== "admin") {
+            state.activeExamId = directExamFromHash.examId;
+            syncActiveExamIntoWorkspace(true);
+            switchMainView("start");
+          } else if (state.currentUser.role === "admin" && (savedSess.activeView === "editor" || savedSess.activeView === "accounts")) {
+            switchMainView(savedSess.activeView);
+          } else {
+            switchMainView("hub");
+          }
+        }
+      }
+
+      hydrateFromIndexedDB();
       pullCloudSync().then(() => {
         applyDirectLinkLoginUI();
         if (!state.syncBlobId) pushCloudSync();
