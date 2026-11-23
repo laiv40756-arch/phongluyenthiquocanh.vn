@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Phòng Luyện Quốc Anh – Hệ Thống Thi & Xếp Hạng Trực Tuyến</title>
+  <title>Siêu Phòng Luyện Quốc Anh – Toán • Vật Lý • Hóa Học (1000+ Đề & IRT)</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -173,14 +173,14 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <h1 id="active-exam-header-title" class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight truncate max-w-[260px] sm:max-w-md">
-              PHÒNG LUYỆN QUỐC ANH
+              SIÊU PHÒNG LUYỆN QUỐC ANH
             </h1>
             <span id="header-user-badge" class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
               Chưa đăng nhập
             </span>
           </div>
           <p id="active-exam-header-sub" class="text-[11px] text-slate-500 truncate">
-            Hệ thống thi trực tuyến • Chấm điểm &amp; Xếp hạng thời gian thực
+            Toán Học • Vật Lý • Hóa Học • Chấm điểm chuẩn &amp; IRT
           </p>
         </div>
       </div>
@@ -353,20 +353,55 @@
 
     <!-- Exam Cards + Leaderboard -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- Left 7 Cols: Exam List -->
+      <!-- Left 7 Cols: Multi-Subject Exam List (1000+ Exams Supported) -->
       <div class="lg:col-span-7 space-y-4">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div>
-            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Danh Sách Đề Thi</h2>
-            <p class="text-xs text-slate-500">Chọn đề thi bên dưới để xem thông tin và bắt đầu làm bài</p>
+            <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Kho Đề Thi Đa Môn (<span id="hub-filtered-count">5</span> đề)</h2>
+            <p class="text-xs text-slate-500">Toán • Vật Lý • Hóa Học — Bấm vào đề để làm bài hoặc bấm "Xem BXH" để xem xếp hạng riêng</p>
           </div>
-          <button id="btn-create-exam-modal" type="button" class="hidden px-3.5 py-2 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
-            + Tạo Đề Thi Mới
-          </button>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-import-exam-modal" type="button" class="hidden px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
+              📄 Tạo Đề Từ File
+            </button>
+            <button id="btn-create-exam-modal" type="button" class="hidden px-3.5 py-2 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
+              + Tạo Đề Mới
+            </button>
+          </div>
+        </div>
+
+        <!-- Subject Filter Tabs & Search Bar -->
+        <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-1.5 flex-wrap" id="subject-filter-tabs">
+            <button type="button" data-subject="all" class="subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-800 text-white transition">
+              📚 Tất cả
+            </button>
+            <button type="button" data-subject="toan" class="subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              📐 Toán Học
+            </button>
+            <button type="button" data-subject="ly" class="subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              ⚡ Vật Lý
+            </button>
+            <button type="button" data-subject="hoa" class="subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+              🧪 Hóa Học
+            </button>
+          </div>
+          <input id="hub-exam-search" type="text" placeholder="Tìm tên đề hoặc mã đề..." class="text-xs px-3 py-1.5 rounded-xl border border-slate-300 w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
 
         <div id="hub-exams-list" class="space-y-3.5">
-          <!-- Populated dynamically -->
+          <!-- Populated dynamically (paginated for 1000+ exams) -->
+        </div>
+
+        <!-- Pagination Bar for 1000+ Exams -->
+        <div id="hub-pagination-bar" class="hidden bg-white rounded-2xl px-4 py-2.5 border border-slate-200 flex items-center justify-between gap-2 text-xs">
+          <button id="btn-hub-prev-page" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+            ← Trang trước
+          </button>
+          <span id="hub-page-info" class="font-bold text-slate-700">Trang 1 / 1</span>
+          <button id="btn-hub-next-page" type="button" class="px-3 py-1.5 rounded-lg border border-slate-300 font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40">
+            Trang sau →
+          </button>
         </div>
       </div>
 
@@ -383,7 +418,7 @@
               </span>
             </div>
             <h3 id="hub-lb-title" class="text-sm sm:text-base font-extrabold text-slate-900 mt-1">
-              BXH Đề 01
+              Chọn đề để xem BXH riêng
             </h3>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
@@ -529,8 +564,8 @@
               <div id="score-part3" class="text-base sm:text-lg font-bold mt-0.5">0,00đ</div>
             </div>
             <div class="bg-white/10 backdrop-blur rounded-xl px-3.5 py-2.5 border border-white/15">
-              <div class="text-[11px] text-blue-200 uppercase font-semibold">Theo Chương</div>
-              <div id="score-chapters" class="text-xs sm:text-sm font-bold mt-1">Ch1: 0đ • Ch2: 0đ</div>
+              <div id="score-extra-label" class="text-[11px] text-blue-200 uppercase font-semibold">Thang Điểm / IRT</div>
+              <div id="score-chapters" class="text-xs sm:text-sm font-bold mt-1">Chuẩn</div>
             </div>
           </div>
         </div>
@@ -664,22 +699,25 @@
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button id="btn-editor-copy-link" type="button" class="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow-sm transition">
+          <button id="btn-editor-copy-link" type="button" class="px-3 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold shadow-sm transition">
             🔗 Tạo &amp; Copy Link Làm Bài
           </button>
-          <button id="btn-editor-new-exam" type="button" class="px-3.5 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold shadow-sm transition">
+          <button id="btn-editor-import-file" type="button" class="px-3 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold shadow-sm transition">
+            📄 Tạo Đề Từ File
+          </button>
+          <button id="btn-editor-new-exam" type="button" class="px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold shadow-sm transition">
             + Tạo Đề Thi Mới
           </button>
-          <button id="btn-editor-add-question" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
+          <button id="btn-editor-add-question" type="button" class="hidden px-3 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
             + Thêm Câu Hỏi
           </button>
-          <button id="btn-editor-delete-exam" type="button" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition">
+          <button id="btn-editor-delete-exam" type="button" class="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition">
             🗑️ Xóa Đề Này
           </button>
         </div>
       </div>
 
-      <!-- Exam Selector, Duration, Open Time & Deadline Settings -->
+      <!-- Exam Selector, Subject, Duration, Max Score, IRT Toggle, Open Time & Deadline -->
       <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end bg-slate-50 p-4 rounded-2xl border border-slate-200">
         <div class="md:col-span-4">
           <label for="editor-exam-select" class="block text-xs font-bold text-slate-700 mb-1">
@@ -688,43 +726,91 @@
           <select id="editor-exam-select" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
           </select>
         </div>
-        <div class="md:col-span-6">
+        <div class="md:col-span-4">
           <label for="editor-exam-title" class="block text-xs font-bold text-slate-700 mb-1">
             Tên bộ đề thi
           </label>
           <input id="editor-exam-title" type="text" class="w-full text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
         <div class="md:col-span-2">
+          <label for="editor-exam-subject" class="block text-xs font-bold text-slate-700 mb-1">
+            Môn học
+          </label>
+          <select id="editor-exam-subject" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-900">
+            <option value="toan">📐 Toán Học</option>
+            <option value="ly">⚡ Vật Lý</option>
+            <option value="hoa">🧪 Hóa Học</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
           <label for="editor-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">
             Thời lượng (phút)
           </label>
-          <input id="editor-exam-duration" type="number" min="5" max="180" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600" />
+          <input id="editor-exam-duration" type="number" min="5" max="300" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
-        <div class="md:col-span-5">
+
+        <div class="md:col-span-2">
+          <label for="editor-exam-max-score" class="block text-xs font-bold text-blue-900 mb-1">
+            🎯 Điểm tối đa
+          </label>
+          <input id="editor-exam-max-score" type="number" step="0.5" min="1" max="1000" value="10" class="w-full text-xs sm:text-sm font-extrabold px-3 py-2 rounded-xl border border-blue-300 bg-white text-blue-900" />
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="block text-xs font-bold text-purple-900 mb-1">
+            🧠 Thuật toán chấm IRT
+          </label>
+          <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-300 bg-purple-50/70 cursor-pointer select-none">
+            <input id="editor-exam-use-irt" type="checkbox" class="w-4 h-4 accent-purple-700 rounded" />
+            <span class="text-xs font-bold text-purple-900">Bật chấm điểm IRT</span>
+          </label>
+        </div>
+
+        <div class="md:col-span-3">
           <div class="flex items-center justify-between mb-1">
             <label for="editor-exam-open-time" class="block text-xs font-bold text-emerald-700">
-              🟢 Cho phép vào bài từ (tùy chọn)
+              🟢 Mở bài từ
             </label>
-            <button id="btn-clear-open-time" type="button" class="text-[10px] font-bold text-slate-500 hover:text-emerald-700 transition" title="Xóa giờ mở đề (cho vào tự do)">
+            <button id="btn-clear-open-time" type="button" class="text-[10px] font-bold text-slate-500 hover:text-emerald-700 transition">
               Xóa giờ mở
             </button>
           </div>
-          <input id="editor-exam-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <input id="editor-exam-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300 bg-white" />
         </div>
-        <div class="md:col-span-5">
+
+        <div class="md:col-span-3">
           <div class="flex items-center justify-between mb-1">
             <label for="editor-exam-deadline" class="block text-xs font-bold text-rose-700">
-              ⏰ Kết thúc / Hạn thu bài (tùy chọn)
+              ⏰ Kết thúc / Thu bài
             </label>
-            <button id="btn-clear-deadline" type="button" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 transition" title="Xóa giới hạn thời gian thu bài">
+            <button id="btn-clear-deadline" type="button" class="text-[10px] font-bold text-slate-500 hover:text-rose-600 transition">
               Xóa hạn
             </button>
           </div>
-          <input id="editor-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500" />
+          <input id="editor-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300 bg-white" />
         </div>
-        <div class="md:col-span-2 flex gap-1">
+
+        <div class="md:col-span-1">
           <button id="btn-save-exam-meta" type="button" class="w-full py-2 px-3 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
             Lưu
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Question By Type Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200">
+        <div class="text-xs font-extrabold text-emerald-950">
+          ➕ Thêm câu hỏi mới vào đề đang chọn:
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btn-editor-add-mc" type="button" class="px-3 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
+            + Trắc nghiệm (4 lựa chọn)
+          </button>
+          <button id="btn-editor-add-tf" type="button" class="px-3 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold shadow-sm transition">
+            + Đúng / Sai (4 ý)
+          </button>
+          <button id="btn-editor-add-sa" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition">
+            + Trả lời ngắn
           </button>
         </div>
       </div>
@@ -836,9 +922,23 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label for="create-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng (phút)</label>
-            <input id="create-exam-duration" type="number" min="10" max="180" value="60" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-slate-300" />
+            <label for="create-exam-subject" class="block text-xs font-bold text-slate-700 mb-1">Môn học</label>
+            <select id="create-exam-subject" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="toan">📐 Toán Học</option>
+              <option value="ly">⚡ Vật Lý</option>
+              <option value="hoa">🧪 Hóa Học</option>
+            </select>
           </div>
+          <div>
+            <label for="create-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng (phút)</label>
+            <input id="create-exam-duration" type="number" min="5" max="300" value="60" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-slate-300" />
+          </div>
+          <div>
+            <label for="create-exam-max-score" class="block text-xs font-bold text-blue-900 mb-1">Điểm tối đa</label>
+            <input id="create-exam-max-score" type="number" step="0.5" min="1" max="1000" value="10" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-blue-300" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label for="create-exam-open-time" class="block text-xs font-bold text-emerald-700 mb-1">Mở bài từ</label>
             <input id="create-exam-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300" />
@@ -848,13 +948,19 @@
             <input id="create-exam-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300" />
           </div>
         </div>
-        <div>
-          <label for="create-exam-template" class="block text-xs font-bold text-slate-700 mb-1">Nguồn câu hỏi khởi tạo</label>
-          <select id="create-exam-template" class="w-full text-xs sm:text-sm font-medium px-3 py-2 rounded-xl border border-slate-300 bg-white">
-            <option value="full22">Đề chuẩn 22 câu VDC</option>
-            <option value="fast12">Đề luyện tốc độ 12 câu VDC chọn lọc</option>
-            <option value="custom6">Đề ngắn 6 câu trọng tâm (3 phần)</option>
-          </select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+          <div>
+            <label for="create-exam-template" class="block text-xs font-bold text-slate-700 mb-1">Nguồn câu hỏi khởi tạo</label>
+            <select id="create-exam-template" class="w-full text-xs sm:text-sm font-medium px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="subject_default">Bộ đề mẫu theo môn đã chọn</option>
+              <option value="empty1">Đề trống (1 câu mẫu tự soạn)</option>
+              <option value="fast12">Đề 12 câu chọn lọc</option>
+            </select>
+          </div>
+          <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-300 bg-purple-50/70 cursor-pointer">
+            <input id="create-exam-use-irt" type="checkbox" class="w-4 h-4 accent-purple-700 rounded" />
+            <span class="text-xs font-bold text-purple-900">Bật thuật toán chấm IRT</span>
+          </label>
         </div>
       </div>
       <div class="flex items-center justify-end gap-2 pt-2">
@@ -913,6 +1019,73 @@
         </button>
         <button id="btn-confirm-delete-exam" type="button" class="px-4 py-2 text-xs sm:text-sm font-bold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm">
           Xóa đề ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Exam From File Modal (Admin Only) -->
+  <div id="import-exam-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/55 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="modal-animate bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 my-auto">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">📄</span>
+          <h3 class="text-lg font-extrabold text-slate-900">Tạo Đề Thi Từ File (.txt, .md, .json, .csv)</h3>
+        </div>
+        <button id="btn-close-import-exam" type="button" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="import-exam-subject" class="block text-xs font-bold text-slate-700 mb-1">Môn học</label>
+          <select id="import-exam-subject" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white">
+            <option value="toan">📐 Toán Học</option>
+            <option value="ly">⚡ Vật Lý</option>
+            <option value="hoa">🧪 Hóa Học</option>
+          </select>
+        </div>
+        <div>
+          <label for="import-exam-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng (phút)</label>
+          <input id="import-exam-duration" type="number" min="5" max="300" value="60" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-slate-300" />
+        </div>
+        <div>
+          <label for="import-exam-max-score" class="block text-xs font-bold text-blue-900 mb-1">Điểm tối đa</label>
+          <input id="import-exam-max-score" type="number" step="0.5" min="1" max="1000" value="10" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-blue-300" />
+        </div>
+      </div>
+
+      <div>
+        <label for="import-exam-title" class="block text-xs font-bold text-slate-700 mb-1">Tên đề thi</label>
+        <input id="import-exam-title" type="text" placeholder="Tự lấy theo tên file nếu để trống..." class="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300" />
+      </div>
+
+      <div class="bg-slate-50 p-3.5 rounded-xl border border-dashed border-slate-300 space-y-2">
+        <label for="import-exam-file-input" class="block text-xs font-bold text-slate-700">
+          Chọn file đề thi từ máy (.txt, .md, .json, .csv):
+        </label>
+        <input id="import-exam-file-input" type="file" accept=".txt,.md,.json,.csv" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-700 file:text-white hover:file:bg-teal-800" />
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <label for="import-exam-raw-text" class="block text-xs font-bold text-slate-700">
+            Hoặc dán trực tiếp nội dung đề thi (hỗ trợ Câu 1: ... A. B. C. D. Đáp án: A / a) b) c) d) / Đáp số:):
+          </label>
+          <button id="btn-fill-import-sample" type="button" class="text-[11px] font-bold text-blue-700 hover:underline">
+            Điền mẫu thử
+          </button>
+        </div>
+        <textarea id="import-exam-raw-text" rows="6" placeholder="Câu 1: ...&#10;A. ...&#10;B. ...&#10;C. ...&#10;D. ...&#10;Đáp án: A" class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-600"></textarea>
+      </div>
+
+      <div id="import-parse-preview" class="text-xs font-semibold text-slate-600 bg-teal-50/70 border border-teal-200 rounded-xl px-3.5 py-2">
+        Sẵn sàng phân tích nội dung đề từ file hoặc văn bản.
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button id="btn-cancel-import-exam" type="button" class="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-300 text-slate-700">Hủy</button>
+        <button id="btn-confirm-import-exam" type="button" class="px-4 py-2 text-xs font-bold rounded-xl bg-teal-700 hover:bg-teal-800 text-white shadow-sm transition">
+          Tạo Đề Từ File &amp; Đồng Bộ
         </button>
       </div>
     </div>
@@ -1289,39 +1462,154 @@
       }
     ];
 
-    function cloneQuestions(subsetIds) {
-      const base = JSON.parse(JSON.stringify(INITIAL_QUESTIONS));
-      if (!subsetIds) return base;
+    const INITIAL_PHYSICS_QUESTIONS = [
+      {
+        id: 1, part: 1, chapter: 1, topic: "Dao động điều hòa", irtDifficulty: -0.6, points: 0.25,
+        stem: "Một vật nhỏ dao động điều hòa theo phương trình $x = 6\cos(4\pi t + \frac{\pi}{3})\text{ (cm)}$. Tốc độ cực đại của vật trong quá trình dao động là:",
+        options: ["$24\pi\text{ cm/s}$", "$12\pi\text{ cm/s}$", "$6\pi\text{ cm/s}$", "$48\pi\text{ cm/s}$"],
+        correct: 0,
+        explanation: "Tốc độ cực đại $v_{\max} = \omega A = 4\pi \cdot 6 = 24\pi\text{ cm/s}$."
+      },
+      {
+        id: 2, part: 1, chapter: 1, topic: "Con lắc lò xo", irtDifficulty: 0.2, points: 0.25,
+        stem: "Một con lắc lò xo có độ cứng $k = 100\text{ N/m}$ gắn vật nhỏ khối lượng $m = 250\text{ g}$ dao động điều hòa. Lấy $\pi^2 = 10$. Chu kì dao động của con lắc bằng:",
+        options: ["$0,2\text{ s}$", "$0,314\text{ s}$", "$0,5\text{ s}$", "$0,1\text{ s}$"],
+        correct: 1,
+        explanation: "Chu kì $T = 2\pi\sqrt{\frac{m}{k}} = 2\pi\sqrt{\frac{0,25}{100}} = 0,1\pi \approx 0,314\text{ s}$."
+      },
+      {
+        id: 3, part: 2, chapter: 2, topic: "Sóng cơ & Giao thoa sóng", irtDifficulty: 0.5, points: 1.0,
+        stem: "Trong thí nghiệm giao thoa sóng trên mặt nước, hai nguồn kết hợp $A, B$ cách nhau $20\text{ cm}$ dao động cùng pha với tần số $f = 20\text{ Hz}$. Tốc độ truyền sóng trên mặt nước là $v = 80\text{ cm/s}$.",
+        statements: [
+          "Bước sóng của sóng truyền trên mặt nước là $\lambda = 4\text{ cm}$.",
+          "Trung điểm $O$ của đoạn $AB$ là một điểm dao động với biên độ cực đại.",
+          "Số điểm dao động với biên độ cực đại trên đoạn thẳng $AB$ là $9$ điểm.",
+          "Khoảng cách giữa hai cực tiểu giao thoa liên tiếp trên đoạn $AB$ là $4\text{ cm}$."
+        ],
+        correct: [true, true, true, false],
+        explanation: "$\lambda = v/f = 4\text{ cm}$ (a đúng). Hai nguồn cùng pha nên $O$ cực đại (b đúng). Số cực đại thỏa mãn $-20 < 4k < 20 \Rightarrow k \in [-4; 4]$ có $9$ điểm (c đúng). Khoảng cách hai cực tiểu liên tiếp trên $AB$ là $\lambda/2 = 2\text{ cm}$ (d sai)."
+      },
+      {
+        id: 4, part: 3, chapter: 2, topic: "Mạch điện xoay chiều RLC", irtDifficulty: 1.1, points: 0.5,
+        stem: "Đặt điện áp xoay chiều có giá trị hiệu dụng $U = 120\text{ V}$ vào hai đầu đoạn mạch $RLC$ nối tiếp đang xảy ra cộng hưởng điện, biết điện trở thuần $R = 40\text{ }\Omega$. Công suất tiêu thụ của đoạn mạch bằng bao nhiêu Watt?",
+        correct: "360",
+        explanation: "Khi cộng hưởng, $Z = R = 40\text{ }\Omega$, công suất $P = \frac{U^2}{R} = \frac{120^2}{40} = 360\text{ W}$."
+      }
+    ];
+
+    const INITIAL_CHEMISTRY_QUESTIONS = [
+      {
+        id: 1, part: 1, chapter: 1, topic: "Este - Lipit", irtDifficulty: -0.5, points: 0.25,
+        stem: "Thủy phân hoàn toàn este $X$ có công thức phân tử $C_4H_8O_2$ trong dung dịch $NaOH$ đun nóng thu được muối natri axetat và ancol $Y$. Công thức cấu tạo thu gọn của $X$ là:",
+        options: ["$CH_3COOC_2H_5$", "$C_2H_5COOCH_3$", "$HCOOC_3H_7$", "$CH_3COOCH_3$"],
+        correct: 0,
+        explanation: "Muối thu được là $CH_3COONa$ (2C) nên gốc axit là $CH_3COO-$, phần còn lại là $-C_2H_5$, vậy $X$ là etyl axetat $CH_3COOC_2H_5$."
+      },
+      {
+        id: 2, part: 1, chapter: 1, topic: "Cacbohiđrat", irtDifficulty: 0.1, points: 0.25,
+        stem: "Lên men $180\text{ gam}$ glucozơ ($C_6H_{12}O_6$) với hiệu suất $80\%$ thu được $V$ lít khí $CO_2$ (ở đktc, $22,4\text{ lít/mol}$). Giá trị của $V$ bằng:",
+        options: ["$44,8\text{ lít}$", "$35,84\text{ lít}$", "$22,4\text{ lít}$", "$17,92\text{ lít}$"],
+        correct: 1,
+        explanation: "$n_{C_6H_{12}O_6} = 1\text{ mol} \Rightarrow n_{CO_2} = 2 \cdot 1 \cdot 0,8 = 1,6\text{ mol} \Rightarrow V = 1,6 \cdot 22,4 = 35,84\text{ lít}$."
+      },
+      {
+        id: 3, part: 2, chapter: 2, topic: "Pin điện hóa & Điện phân", irtDifficulty: 0.6, points: 1.0,
+        stem: "Cho pin điện hóa chuẩn $Zn - Cu$ với thế điện cực chuẩn $E^\circ_{Zn^{2+}/Zn} = -0,76\text{ V}$ và $E^\circ_{Cu^{2+}/Cu} = +0,34\text{ V}$.",
+        statements: [
+          "Ở cực âm (anot) xảy ra quá trình oxi hóa $Zn \rightarrow Zn^{2+} + 2e$.",
+          "Sức điện động chuẩn của pin $Zn - Cu$ bằng $1,10\text{ V}$.",
+          "Trong quá trình pin hoạt động, khối lượng thanh đồng giảm dần.",
+          "Dòng electron di chuyển ở mạch ngoài từ điện cực $Zn$ sang điện cực $Cu$."
+        ],
+        correct: [true, true, false, true],
+        explanation: "$E^\circ_{pin} = 0,34 - (-0,76) = 1,10\text{ V}$ (b đúng). $Cu^{2+}$ nhận e tạo $Cu$ bám vào cực dương nên khối lượng thanh $Cu$ tăng (c sai)."
+      },
+      {
+        id: 4, part: 3, chapter: 2, topic: "Bài toán Kim loại tác dụng axit", irtDifficulty: 1.0, points: 0.5,
+        stem: "Cho $5,4\text{ gam}$ nhôm ($Al = 27$) tan hoàn toàn trong dung dịch $HCl$ dư, thu được bao nhiêu gam muối $AlCl_3$ ($AlCl_3 = 133,5$)?",
+        correct: "26.7",
+        explanation: "$n_{Al} = 5,4 / 27 = 0,2\text{ mol} \Rightarrow n_{AlCl_3} = 0,2\text{ mol} \Rightarrow m = 0,2 \cdot 133,5 = 26,7\text{ gam}$."
+      }
+    ];
+
+    function getSubjectLabel(subj) {
+      if (subj === "ly") return "⚡ Vật Lý";
+      if (subj === "hoa") return "🧪 Hóa Học";
+      return "📐 Toán Học";
+    }
+
+    function getDefaultPointsForPart(part) {
+      if (part === 1) return 0.25;
+      if (part === 2) return 1.0;
+      return 0.5;
+    }
+
+    function normalizeExamQuestions(qs) {
+      return (qs || []).map((q, idx) => ({
+        ...q,
+        id: idx + 1,
+        points: q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part),
+        irtDifficulty: q.irtDifficulty !== undefined ? Number(q.irtDifficulty) : (q.part === 1 ? -0.3 : q.part === 2 ? 0.5 : 1.0)
+      }));
+    }
+
+    function cloneQuestions(subsetIds, subject) {
+      let source = INITIAL_QUESTIONS;
+      if (subject === "ly") source = INITIAL_PHYSICS_QUESTIONS;
+      else if (subject === "hoa") source = INITIAL_CHEMISTRY_QUESTIONS;
+      const base = JSON.parse(JSON.stringify(source));
+      if (!subsetIds) return normalizeExamQuestions(base);
       const filtered = base.filter((q) => subsetIds.includes(q.id));
-      return filtered.map((q, idx) => ({ ...q, id: idx + 1 }));
+      return normalizeExamQuestions(filtered);
     }
 
     const INITIAL_EXAMS = [
       {
         examId: "de-01",
-        title: "Đề số 01: Đề Tuyển Chọn HSG Toán 12 – Toán Thực Tế VDC (Chuẩn 22 câu)",
+        subject: "toan",
+        title: "Toán 12 – Đề 01: Tuyển Chọn HSG Toán Thực Tế VDC (22 câu)",
         durationMinutes: 90,
+        maxScore: 10,
+        useIRT: false,
         openTime: "",
         deadline: "",
-        questions: cloneQuestions(null),
+        questions: cloneQuestions(null, "toan"),
         leaderboard: []
       },
       {
         examId: "de-02",
-        title: "Đề số 02: Đề Luyện Tốc Độ Chiến Thuật TDM – Dịch Trục & Cực Trị Tọa Độ Oxyz",
+        subject: "toan",
+        title: "Toán 12 – Đề 02: Luyện Tốc Độ Dịch Trục & Tọa Độ Oxyz (12 câu)",
         durationMinutes: 45,
+        maxScore: 10,
+        useIRT: false,
         openTime: "",
         deadline: "",
-        questions: cloneQuestions([1, 4, 5, 6, 8, 10, 13, 15, 17, 19, 20, 22]),
+        questions: cloneQuestions([1, 4, 5, 6, 8, 10, 13, 15, 17, 19, 20, 22], "toan"),
         leaderboard: []
       },
       {
-        examId: "de-03",
-        title: "Đề số 03: Đề Thực Chiến Tổ 2 – Tối Ưu Hóa Hình Học & Hệ Lực Không Gian",
-        durationMinutes: 60,
+        examId: "ly-01",
+        subject: "ly",
+        title: "Vật Lý 12 – Đề 01: Dao Động Cơ, Sóng Cơ & Điện Xoay Chiều",
+        durationMinutes: 45,
+        maxScore: 10,
+        useIRT: false,
         openTime: "",
         deadline: "",
-        questions: cloneQuestions([2, 3, 7, 9, 11, 12, 14, 16, 18, 20, 21, 22]),
+        questions: cloneQuestions(null, "ly"),
+        leaderboard: []
+      },
+      {
+        examId: "hoa-01",
+        subject: "hoa",
+        title: "Hóa Học 12 – Đề 01: Este, Cacbohiđrat & Pin Điện Hóa",
+        durationMinutes: 45,
+        maxScore: 10,
+        useIRT: false,
+        openTime: "",
+        deadline: "",
+        questions: cloneQuestions(null, "hoa"),
         leaderboard: []
       }
     ];
@@ -1343,12 +1631,13 @@
           if (this.db) return resolve(this.db);
           if (!("indexedDB" in window)) return resolve(null);
           try {
-            const req = indexedDB.open(this.dbName, 1);
+            const req = indexedDB.open(this.dbName, 2);
             req.onupgradeneeded = (ev) => {
               const db = ev.target.result;
               if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv");
               if (!db.objectStoreNames.contains("submissions")) db.createObjectStore("submissions", { keyPath: "uid" });
               if (!db.objectStoreNames.contains("drafts")) db.createObjectStore("drafts", { keyPath: "draftId" });
+              if (!db.objectStoreNames.contains("exams")) db.createObjectStore("exams", { keyPath: "examId" });
             };
             req.onsuccess = (ev) => {
               this.db = ev.target.result;
@@ -1403,6 +1692,41 @@
           map[uid] = record;
           localStorage.setItem(SUBMISSIONS_ARCHIVE_KEY, JSON.stringify(map));
         } catch (e) {}
+      },
+      async saveExamsBatch(examsList) {
+        const db = await this.open();
+        if (!db || !Array.isArray(examsList)) return;
+        return new Promise((resolve) => {
+          try {
+            const tx = db.transaction("exams", "readwrite");
+            const store = tx.objectStore("exams");
+            examsList.forEach((ex) => {
+              if (ex && ex.examId) store.put(JSON.parse(JSON.stringify(ex)));
+            });
+            tx.oncomplete = () => resolve(true);
+            tx.onerror = () => resolve(false);
+          } catch (e) { resolve(false); }
+        });
+      },
+      async deleteExamIDB(examId) {
+        const db = await this.open();
+        if (!db || !examId) return;
+        try {
+          const tx = db.transaction("exams", "readwrite");
+          tx.objectStore("exams").delete(examId);
+        } catch (e) {}
+      },
+      async getAllExams() {
+        const db = await this.open();
+        if (!db) return [];
+        return new Promise((resolve) => {
+          try {
+            const tx = db.transaction("exams", "readonly");
+            const req = tx.objectStore("exams").getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => resolve([]);
+          } catch (e) { resolve([]); }
+        });
       },
       async getAllSubmissions() {
         const results = new Map();
@@ -1495,6 +1819,11 @@
       exams: JSON.parse(JSON.stringify(INITIAL_EXAMS)),
       activeExamId: "de-01",
       editorExamId: "de-01",
+      selectedHubLbExamId: "",
+      activeSubjectFilter: "all",
+      hubSearchQuery: "",
+      hubPage: 1,
+      hubPageSize: 10,
       activeView: "hub", // "hub" | "start" | "exam" | "editor" | "accounts"
       questions: [],
       mcAnswers: {},
@@ -1821,17 +2150,12 @@
       merged.forEach((entry) => {
         entry.isCurrent = mySbd && entry.sbd.toLowerCase() === mySbd;
         if (entry.rawAnswers && Array.isArray(questions)) {
-          let p1 = 0, p2 = 0, p3 = 0;
-          questions.forEach((q) => {
-            const sc = computeQuestionScore(q, entry.rawAnswers.mc, entry.rawAnswers.tf, entry.rawAnswers.sa);
-            if (q.part === 1) p1 += sc;
-            if (q.part === 2) p2 += sc;
-            if (q.part === 3) p3 += sc;
-          });
-          entry.p1 = p1;
-          entry.p2 = p2;
-          entry.p3 = p3;
-          entry.total = p1 + p2 + p3;
+          const fakeEx = typeof questions === "object" && !Array.isArray(questions) ? questions : { questions, maxScore: 10, useIRT: false };
+          const res = computeExamScoreWithOptionalIRT(fakeEx, entry.rawAnswers.mc, entry.rawAnswers.tf, entry.rawAnswers.sa);
+          entry.p1 = res.p1;
+          entry.p2 = res.p2;
+          entry.p3 = res.p3;
+          entry.total = res.total;
         }
       });
       merged.sort((a, b) => {
@@ -1880,12 +2204,9 @@
         badge.classList.remove("hidden");
       }
 
-      // Sync the Hub BXH dropdown to the active exam so Teacher & Students immediately see the updated BXH in Hub as well
+      // Only refresh Hub BXH if the user is ALREADY viewing this exact exam's BXH (never hijack another exam's BXH!)
       const hubSel = document.getElementById("hub-lb-exam-select");
-      if (hubSel && hubSel.value !== ex.examId) {
-        hubSel.value = ex.examId;
-        renderHubLeaderboard(ex.examId);
-      } else if (hubSel) {
+      if (hubSel && hubSel.value === ex.examId) {
         renderHubLeaderboard(ex.examId);
       }
 
@@ -2045,7 +2366,7 @@
         state.questions = ex.questions;
         state.leaderboard = ex.leaderboard;
         document.getElementById("active-exam-header-title").textContent =
-          state.activeView === "hub" ? "PHÒNG LUYỆN QUỐC ANH" : ex.title;
+          state.activeView === "hub" ? "SIÊU PHÒNG LUYỆN QUỐC ANH" : ex.title;
         if (state.activeView !== "hub") {
           document.getElementById("active-exam-header-sub").textContent =
             `Thời lượng: ${ex.durationMinutes} phút • ${ex.questions.length} câu` +
@@ -2134,7 +2455,7 @@
           state.questions = ex.questions;
           state.leaderboard = ex.leaderboard;
           document.getElementById("active-exam-header-title").textContent =
-            state.activeView === "hub" ? "PHÒNG LUYỆN QUỐC ANH" : ex.title;
+            state.activeView === "hub" ? "SIÊU PHÒNG LUYỆN QUỐC ANH" : ex.title;
           if (state.activeView !== "hub") {
             document.getElementById("active-exam-header-sub").textContent =
               `Thời lượng: ${ex.durationMinutes} phút • ${ex.questions.length} câu` +
@@ -2179,7 +2500,9 @@
           const ev = pendingLivePopupEvent;
           pendingLivePopupEvent = null;
           showToast(`🎉 ${ev.studentName} vừa nộp bài "${ev.examTitle}" đạt ${Number(ev.score).toFixed(2).replace(".", ",")}đ!`);
-          renderBroadcastLeaderboardModal(true);
+          if (state.broadcastLeaderboardExamId === ev.examId) {
+            renderBroadcastLeaderboardModal(true);
+          }
         } else {
           renderBroadcastLeaderboardModal(false);
         }
@@ -2521,10 +2844,25 @@
         state.examsModifiedAt = now;
       }
       const payload = getSerializablePayload();
+      ExamPersistenceDB.saveExamsBatch(state.exams);
+      ExamPersistenceDB.putKV("portal_state", payload);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      } catch (e) {}
-      ExamPersistenceDB.putKV("portal_state", payload);
+      } catch (e) {
+        // When > 1000 exams exceed localStorage 5MB quota, store lightweight metadata in localStorage while full exams live in IndexedDB
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            accounts: state.accounts,
+            teacherAdminPass: state.teacherAdminPass,
+            passwordUpdatedAt: state.passwordUpdatedAt,
+            syncRoomCode: state.syncRoomCode,
+            syncBlobId: state.syncBlobId,
+            updatedAt: state.updatedAt,
+            examsModifiedAt: state.examsModifiedAt,
+            storedInIDB: true
+          }));
+        } catch (e2) {}
+      }
       // Persist all leaderboard entries into unlimited IndexedDB submissions store
       state.exams.forEach((ex) => {
         (ex.leaderboard || []).forEach((entry) => {
@@ -2581,6 +2919,13 @@
         const savedPortal = await ExamPersistenceDB.getKV("portal_state");
         if (savedPortal && (savedPortal.updatedAt || 0) > (state.updatedAt || 0)) {
           applySyncedPayload(savedPortal);
+        }
+        const idbExams = await ExamPersistenceDB.getAllExams();
+        if (Array.isArray(idbExams) && idbExams.length > state.exams.length) {
+          const exMap = new Map();
+          state.exams.forEach((e) => exMap.set(e.examId, e));
+          idbExams.forEach((e) => { if (e && e.examId && !exMap.has(e.examId)) exMap.set(e.examId, e); });
+          state.exams = Array.from(exMap.values());
         }
         const allSubs = await ExamPersistenceDB.getAllSubmissions();
         let mergedAny = false;
@@ -2649,7 +2994,7 @@
       if (!ex) {
         state.questions = [];
         state.leaderboard = [];
-        document.getElementById("active-exam-header-title").textContent = "PHÒNG LUYỆN QUỐC ANH";
+        document.getElementById("active-exam-header-title").textContent = "SIÊU PHÒNG LUYỆN QUỐC ANH";
         document.getElementById("active-exam-header-sub").textContent = "Hiện chưa có đề thi nào trong phòng luyện";
         return;
       }
@@ -2890,12 +3235,14 @@
         kpiStrip.classList.remove("hidden");
         btnCreateExam.classList.remove("hidden");
         if (btnBroadcastLb) btnBroadcastLb.classList.remove("hidden");
+        const btnImp = document.getElementById("btn-import-exam-modal"); if (btnImp) btnImp.classList.remove("hidden");
       } else {
         navEditor.classList.add("hidden");
         navAccounts.classList.add("hidden");
         kpiStrip.classList.add("hidden");
         btnCreateExam.classList.add("hidden");
         if (btnBroadcastLb) btnBroadcastLb.classList.add("hidden");
+        const btnImp = document.getElementById("btn-import-exam-modal"); if (btnImp) btnImp.classList.add("hidden");
       }
     }
 
@@ -2954,7 +3301,7 @@
       }
 
       if (viewName === "hub") {
-        document.getElementById("active-exam-header-title").textContent = "PHÒNG LUYỆN QUỐC ANH";
+        document.getElementById("active-exam-header-title").textContent = "SIÊU PHÒNG LUYỆN QUỐC ANH";
         document.getElementById("active-exam-header-sub").textContent = "Hệ thống thi trực tuyến • Chấm điểm & Xếp hạng thời gian thực";
         renderHubView();
       }
@@ -3063,27 +3410,64 @@
       document.getElementById("nav-accounts-count").textContent = String(state.accounts.length);
 
       let totalAttempts = 0;
-      state.exams.forEach((ex) => { totalAttempts += ex.leaderboard.length; });
+      state.exams.forEach((ex) => { totalAttempts += (ex.leaderboard || []).length; });
       document.getElementById("kpi-total-attempts").textContent = `${totalAttempts} lượt`;
+
+      const filteredExams = state.exams.filter((ex) => {
+        const subj = ex.subject || "toan";
+        if (state.activeSubjectFilter !== "all" && subj !== state.activeSubjectFilter) return false;
+        if (state.hubSearchQuery) {
+          const q = state.hubSearchQuery.toLowerCase();
+          if (!(ex.title || "").toLowerCase().includes(q) && !(ex.examId || "").toLowerCase().includes(q)) return false;
+        }
+        return true;
+      });
+
+      const countSpan = document.getElementById("hub-filtered-count");
+      if (countSpan) countSpan.textContent = String(filteredExams.length);
+
+      const totalPages = Math.max(1, Math.ceil(filteredExams.length / state.hubPageSize));
+      if (state.hubPage > totalPages) state.hubPage = totalPages;
+      if (state.hubPage < 1) state.hubPage = 1;
+
+      const startIdx = (state.hubPage - 1) * state.hubPageSize;
+      const pageExams = filteredExams.slice(startIdx, startIdx + state.hubPageSize);
+
+      const pagBar = document.getElementById("hub-pagination-bar");
+      if (pagBar) {
+        if (filteredExams.length > state.hubPageSize) {
+          pagBar.classList.remove("hidden");
+          document.getElementById("hub-page-info").textContent = `Trang ${state.hubPage} / ${totalPages} (${filteredExams.length} đề)`;
+          document.getElementById("btn-hub-prev-page").disabled = state.hubPage <= 1;
+          document.getElementById("btn-hub-next-page").disabled = state.hubPage >= totalPages;
+        } else {
+          pagBar.classList.add("hidden");
+        }
+      }
 
       const listEl = document.getElementById("hub-exams-list");
       listEl.innerHTML = "";
 
-      if (state.exams.length === 0) {
-        listEl.innerHTML = `<div class="bg-white rounded-2xl p-8 border border-slate-200 text-center text-xs sm:text-sm text-slate-500">Hiện chưa có đề thi nào trong phòng luyện.${isAdmin ? ' Hãy bấm <strong>+ Tạo Đề Thi Mới</strong> để thêm đề.' : ''}</div>`;
-        document.getElementById("hub-lb-exam-select").innerHTML = "";
-        document.getElementById("hub-lb-title").textContent = "BXH";
-        document.getElementById("hub-lb-tbody").innerHTML = `<tr><td colspan="4" class="py-8 text-center text-xs text-slate-400">Chưa có đề thi.</td></tr>`;
-        return;
+      if (filteredExams.length === 0) {
+        listEl.innerHTML = `<div class="bg-white rounded-2xl p-8 border border-slate-200 text-center text-xs sm:text-sm text-slate-500">Không có đề thi nào phù hợp.${isAdmin ? ' Hãy bấm <strong>+ Tạo Đề Mới</strong> hoặc <strong>📄 Tạo Đề Từ File</strong>.' : ''}</div>`;
       }
 
-      state.exams.forEach((ex, idx) => {
+      pageExams.forEach((ex, pageLocalIdx) => {
+        const idx = startIdx + pageLocalIdx;
+        const subj = ex.subject || "toan";
+        const subjBadgeColor = subj === "ly"
+          ? "bg-amber-100 text-amber-900 border-amber-300"
+          : subj === "hoa"
+          ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+          : "bg-indigo-100 text-indigo-900 border-indigo-300";
         const notOpen = isExamNotYetOpen(ex);
         const expired = isExamExpired(ex);
         const p1Count = ex.questions.filter((q) => q.part === 1).length;
         const p2Count = ex.questions.filter((q) => q.part === 2).length;
         const p3Count = ex.questions.filter((q) => q.part === 3).length;
-        const maxScore = (p1Count * 0.25 + p2Count * 1.0 + p3Count * 0.5).toFixed(2).replace(".", ",");
+        const examMaxScore = Number(ex.maxScore) || 10;
+        const maxScore = examMaxScore.toFixed(2).replace(".", ",");
+        const irtBadge = ex.useIRT ? `<span class="px-2 py-0.5 text-[10px] font-extrabold rounded-full bg-purple-100 text-purple-800 border border-purple-200">🧠 IRT</span>` : "";
 
         const openTimeBadge = ex.openTime
           ? `<span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full ${
@@ -3122,6 +3506,10 @@
                 <span class="px-2.5 py-0.5 text-[11px] font-extrabold rounded-lg bg-blue-900 text-white">
                   ĐỀ #${String(idx + 1).padStart(2, "0")}
                 </span>
+                <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full border ${subjBadgeColor}">
+                  ${getSubjectLabel(subj)}
+                </span>
+                ${irtBadge}
                 <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-amber-50 text-amber-800 border border-amber-200">
                   ⏱ ${ex.durationMinutes} phút
                 </span>
@@ -3162,14 +3550,19 @@
         });
 
         card.querySelector(".btn-view-this-lb").addEventListener("click", () => {
-          document.getElementById("hub-lb-exam-select").value = ex.examId;
-          renderHubLeaderboard(ex.examId);
-          if (state.currentUser.role === "admin") {
-            state.broadcastLeaderboardExamId = ex.examId;
-            saveAndSyncAllDevices(false);
-            renderBroadcastLeaderboardModal();
-            showToast(`📡 Đang mở & chiếu BXH "${ex.title}" cho toàn bộ thiết bị!`);
+          state.selectedHubLbExamId = ex.examId;
+          const lbSel = document.getElementById("hub-lb-exam-select");
+          if (lbSel) {
+            if (!Array.from(lbSel.options).some((o) => o.value === ex.examId)) {
+              const opt = document.createElement("option");
+              opt.value = ex.examId;
+              opt.textContent = ex.title;
+              lbSel.appendChild(opt);
+            }
+            lbSel.value = ex.examId;
           }
+          renderHubLeaderboard(ex.examId);
+          showToast(`Đang xem BXH riêng của: "${ex.title}"`);
         });
 
         if (isAdmin) {
@@ -3187,23 +3580,37 @@
       });
 
       const sel = document.getElementById("hub-lb-exam-select");
-      const currentVal = sel.value || state.activeExamId;
-      sel.innerHTML = "";
-      state.exams.forEach((ex) => {
+      sel.innerHTML = `<option value="">-- Chọn đề để xem BXH --</option>`;
+      // Limit dropdown options to filteredExams (max 200 for fast DOM) so 1000+ exams stay instantaneous
+      filteredExams.slice(0, 200).forEach((ex) => {
         const opt = document.createElement("option");
         opt.value = ex.examId;
         opt.textContent = ex.title;
         sel.appendChild(opt);
       });
-      sel.value = state.exams.some((e) => e.examId === currentVal) ? currentVal : state.exams[0].examId;
-      renderHubLeaderboard(sel.value);
+      if (state.selectedHubLbExamId && state.exams.some((e) => e.examId === state.selectedHubLbExamId)) {
+        sel.value = state.selectedHubLbExamId;
+        renderHubLeaderboard(state.selectedHubLbExamId);
+      } else {
+        sel.value = "";
+        renderHubLeaderboard("");
+      }
     }
 
     function renderHubLeaderboard(examId) {
-      const ex = state.exams.find((e) => e.examId === examId) || state.exams[0];
-      if (!ex) return;
-      document.getElementById("hub-lb-title").textContent = `BXH: ${ex.title}`;
       const tbody = document.getElementById("hub-lb-tbody");
+      if (!examId) {
+        document.getElementById("hub-lb-title").textContent = "Chọn đề để xem BXH riêng";
+        tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-xs text-slate-400">Bấm nút <strong>"Xem BXH"</strong> ở bất kỳ đề nào bên trái để xem bảng xếp hạng riêng của đề đó.</td></tr>`;
+        return;
+      }
+      const ex = state.exams.find((e) => e.examId === examId);
+      if (!ex) {
+        document.getElementById("hub-lb-title").textContent = "Không tìm thấy BXH";
+        tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-xs text-slate-400">Không tìm thấy dữ liệu đề này.</td></tr>`;
+        return;
+      }
+      document.getElementById("hub-lb-title").textContent = `BXH: ${ex.title}`;
       tbody.innerHTML = "";
 
       if (ex.leaderboard.length === 0) {
@@ -3250,26 +3657,112 @@
       const mc = mcMap || state.mcAnswers;
       const tf = tfMap || state.tfAnswers;
       const sa = saMap || state.saAnswers;
-      if (q.part === 1) return mc[q.id] === q.correct ? 0.25 : 0;
+      const qPts = q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part);
+
+      if (q.part === 1) return mc[q.id] === q.correct ? qPts : 0;
       if (q.part === 2) {
         const ans = tf[q.id] || {};
         let matchCount = 0;
         for (let i = 0; i < 4; i++) {
           if (ans[i] === q.correct[i]) matchCount++;
         }
-        if (matchCount === 4) return 1.0;
-        if (matchCount === 3) return 0.5;
-        if (matchCount === 2) return 0.25;
-        if (matchCount === 1) return 0.1;
+        if (matchCount === 4) return qPts;
+        if (matchCount === 3) return qPts * 0.5;
+        if (matchCount === 2) return qPts * 0.25;
+        if (matchCount === 1) return qPts * 0.1;
         return 0;
       }
       if (q.part === 3) {
         const raw = (sa[q.id] || "").trim().replace(",", ".");
         const target = String(q.correct).trim().replace(",", ".");
         if (!raw) return 0;
-        return Number(raw) === Number(target) ? 0.5 : 0;
+        if (!isNaN(Number(raw)) && !isNaN(Number(target))) {
+          return Number(raw) === Number(target) ? qPts : 0;
+        }
+        return raw.toLowerCase() === target.toLowerCase() ? qPts : 0;
       }
       return 0;
+    }
+
+    // 2PL IRT Ability Estimation (Newton-Raphson MLE) -> mapped cleanly to [0, ex.maxScore]
+    function computeExamScoreWithOptionalIRT(ex, mcMap, tfMap, saMap) {
+      const qs = ex.questions || [];
+      const maxScore = Number(ex.maxScore) || 10;
+      let p1 = 0, p2 = 0, p3 = 0;
+      let rawSum = 0, rawMax = 0;
+
+      const responses = [];
+      qs.forEach((q) => {
+        const qMax = q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part);
+        const sc = computeQuestionScore(q, mcMap, tfMap, saMap);
+        rawSum += sc;
+        rawMax += qMax;
+        if (q.part === 1) p1 += sc;
+        if (q.part === 2) p2 += sc;
+        if (q.part === 3) p3 += sc;
+
+        const u = qMax > 0 ? Math.min(1, Math.max(0, sc / qMax)) : 0;
+        const b = q.irtDifficulty !== undefined ? Number(q.irtDifficulty) : 0;
+        const a = q.part === 3 ? 1.4 : q.part === 2 ? 1.2 : 1.0; // Discrimination parameter
+        responses.push({ u, a, b });
+      });
+
+      if (!ex.useIRT || qs.length === 0) {
+        const scale = rawMax > 0 ? (maxScore / rawMax) : 1;
+        return {
+          total: rawSum * scale,
+          p1: p1 * scale,
+          p2: p2 * scale,
+          p3: p3 * scale,
+          theta: null,
+          usedIRT: false
+        };
+      }
+
+      // Check all-zero or all-full boundary cases
+      if (rawSum <= 0) {
+        return { total: 0, p1: 0, p2: 0, p3: 0, theta: -3.0, usedIRT: true };
+      }
+      if (rawMax > 0 && Math.abs(rawSum - rawMax) < 1e-6) {
+        const scale = maxScore / rawMax;
+        return { total: maxScore, p1: p1 * scale, p2: p2 * scale, p3: p3 * scale, theta: 3.0, usedIRT: true };
+      }
+
+      // Newton-Raphson with Bayesian MAP prior N(0, 1) for numerical stability
+      let theta = 0;
+      for (let iter = 0; iter < 15; iter++) {
+        let d1 = -theta; // Prior derivative
+        let d2 = -1;     // Prior 2nd derivative
+        responses.forEach((item) => {
+          const z = item.a * (theta - item.b);
+          const p = 1 / (1 + Math.exp(-Math.max(-20, Math.min(20, z))));
+          d1 += item.a * (item.u - p);
+          d2 -= item.a * item.a * p * (1 - p);
+        });
+        if (Math.abs(d2) < 1e-9) break;
+        const step = d1 / d2;
+        theta = Math.max(-3.0, Math.min(3.0, theta - step));
+        if (Math.abs(step) < 1e-4) break;
+      }
+
+      // Expected proportion on test characteristic curve (TCC) at estimated theta
+      let tccSum = 0;
+      responses.forEach((item) => {
+        const z = item.a * (theta - item.b);
+        tccSum += 1 / (1 + Math.exp(-Math.max(-20, Math.min(20, z))));
+      });
+      const irtTotal = (tccSum / responses.length) * maxScore;
+      const partSum = p1 + p2 + p3;
+      const pScale = partSum > 0 ? (irtTotal / partSum) : 0;
+
+      return {
+        total: irtTotal,
+        p1: p1 * pScale,
+        p2: p2 * pScale,
+        p3: p3 * pScale,
+        theta: theta,
+        usedIRT: true
+      };
     }
 
     function updateSidebarAndStats() {
@@ -3608,17 +4101,8 @@
       state.timerPaused = true;
       state.showAllSolutions = true;
 
-      let p1 = 0, p2 = 0, p3 = 0, ch1 = 0, ch2 = 0;
-      state.questions.forEach((q) => {
-        const sc = computeQuestionScore(q);
-        if (q.part === 1) p1 += sc;
-        if (q.part === 2) p2 += sc;
-        if (q.part === 3) p3 += sc;
-        if (q.chapter === 1) ch1 += sc;
-        if (q.chapter === 2) ch2 += sc;
-      });
-
-      const total = p1 + p2 + p3;
+      const scored = computeExamScoreWithOptionalIRT(ex, state.mcAnswers, state.tfAnswers, state.saAnswers);
+      const p1 = scored.p1, p2 = scored.p2, p3 = scored.p3, total = scored.total;
       const studentName = state.currentUser.name || "Thí sinh";
       const sbd = state.currentUser.sbd || `HS-${Date.now().toString().slice(-4)}`;
       const timeSpent = Math.max(1, ex.durationMinutes * 60 - state.secondsLeft);
@@ -3668,7 +4152,7 @@
         timeSeconds: timeSpent,
         timestamp: Date.now()
       };
-      state.broadcastLeaderboardExamId = ex.examId;
+      // Keep BXH strictly isolated per exam (do not hijack other exams' BXH views)
       // Permanently store submission in unlimited IndexedDB + localStorage archive + mark device draft as submitted
       ExamPersistenceDB.putSubmission(ex.examId, entry);
       saveExamDraftToDevice();
@@ -3684,7 +4168,10 @@
       document.getElementById("score-part1").textContent = `${p1.toFixed(2).replace(".", ",")}đ`;
       document.getElementById("score-part2").textContent = `${p2.toFixed(2).replace(".", ",")}đ`;
       document.getElementById("score-part3").textContent = `${p3.toFixed(2).replace(".", ",")}đ`;
-      document.getElementById("score-chapters").textContent = `Ch.1: ${ch1.toFixed(2).replace(".", ",")}đ • Ch.2: ${ch2.toFixed(2).replace(".", ",")}đ`;
+      document.getElementById("score-extra-label").textContent = scored.usedIRT ? "Thuật toán IRT" : "Thang Điểm";
+      document.getElementById("score-chapters").textContent = scored.usedIRT
+        ? `θ = ${scored.theta.toFixed(2)} • Max ${Number(ex.maxScore) || 10}đ`
+        : `Chuẩn • Max ${Number(ex.maxScore) || 10}đ`;
 
       renderLeaderboardTable();
 
@@ -3705,17 +4192,11 @@
     function regradeExamLeaderboard(ex) {
       ex.leaderboard.forEach((entry) => {
         if (!entry.rawAnswers) return;
-        let p1 = 0, p2 = 0, p3 = 0;
-        ex.questions.forEach((q) => {
-          const sc = computeQuestionScore(q, entry.rawAnswers.mc, entry.rawAnswers.tf, entry.rawAnswers.sa);
-          if (q.part === 1) p1 += sc;
-          if (q.part === 2) p2 += sc;
-          if (q.part === 3) p3 += sc;
-        });
-        entry.p1 = p1;
-        entry.p2 = p2;
-        entry.p3 = p3;
-        entry.total = p1 + p2 + p3;
+        const res = computeExamScoreWithOptionalIRT(ex, entry.rawAnswers.mc, entry.rawAnswers.tf, entry.rawAnswers.sa);
+        entry.p1 = res.p1;
+        entry.p2 = res.p2;
+        entry.p3 = res.p3;
+        entry.total = res.total;
       });
       ex.leaderboard.sort((a, b) => {
         if (Math.abs(b.total - a.total) > 1e-6) return b.total - a.total;
@@ -3744,7 +4225,10 @@
         return;
       }
       document.getElementById("editor-exam-title").value = ex.title;
+      document.getElementById("editor-exam-subject").value = ex.subject || "toan";
       document.getElementById("editor-exam-duration").value = ex.durationMinutes;
+      document.getElementById("editor-exam-max-score").value = Number(ex.maxScore) || 10;
+      document.getElementById("editor-exam-use-irt").checked = !!ex.useIRT;
       document.getElementById("editor-exam-open-time").value = ex.openTime || "";
       document.getElementById("editor-exam-deadline").value = ex.deadline || "";
       document.getElementById("cfg-sync-room-id").value = state.syncRoomCode || "PHONG-QUOC-ANH";
@@ -3807,9 +4291,17 @@
 
         card.innerHTML = `
           <div class="flex items-center justify-between gap-2 flex-wrap border-b border-slate-100 pb-2.5">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <span class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-bold text-xs">Câu ${q.id}</span>
               <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold">${partName}</span>
+              <label class="flex items-center gap-1 text-xs font-bold text-blue-900 bg-blue-50/70 px-2 py-1 rounded-lg border border-blue-200">
+                <span>Điểm:</span>
+                <input type="number" step="0.05" min="0" max="100" value="${q.points !== undefined ? q.points : getDefaultPointsForPart(q.part)}" class="inp-q-points w-14 text-xs font-extrabold text-center bg-white border border-blue-300 rounded px-1 py-0.5" />
+              </label>
+              <label class="flex items-center gap-1 text-xs font-bold text-purple-900 bg-purple-50/70 px-2 py-1 rounded-lg border border-purple-200" title="Độ khó IRT (b): -2 (Dễ) đến +2 (Rất khó)">
+                <span>IRT b:</span>
+                <input type="number" step="0.1" min="-3" max="3" value="${q.irtDifficulty !== undefined ? q.irtDifficulty : 0}" class="inp-q-irt-b w-14 text-xs font-extrabold text-center bg-white border border-purple-300 rounded px-1 py-0.5" />
+              </label>
             </div>
             <div class="flex items-center gap-2">
               <button type="button" class="btn-save-q-changes px-3.5 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition">
@@ -3855,6 +4347,10 @@
         card.querySelector(".btn-save-q-changes").addEventListener("click", () => {
           q.stem = card.querySelector(".inp-q-stem").value.trim();
           q.explanation = card.querySelector(".inp-q-exp").value.trim();
+          const ptsVal = Number(card.querySelector(".inp-q-points").value);
+          if (!isNaN(ptsVal) && ptsVal >= 0) q.points = ptsVal;
+          const irtVal = Number(card.querySelector(".inp-q-irt-b").value);
+          if (!isNaN(irtVal)) q.irtDifficulty = Math.max(-3, Math.min(3, irtVal));
           if (q.part === 1) {
             card.querySelectorAll(".inp-mc-opt").forEach((inp) => {
               q.options[Number(inp.dataset.optIdx)] = inp.value.trim();
@@ -4232,9 +4728,10 @@
 
       document.getElementById("btn-result-back-hub").addEventListener("click", () => switchMainView("hub"));
 
-      // Hub Leaderboard select & Teacher Broadcast BXH
+      // Hub Leaderboard select & Teacher Broadcast BXH (Strictly isolated per exam)
       document.getElementById("hub-lb-exam-select").addEventListener("change", (e) => {
         const selectedId = e.target.value;
+        state.selectedHubLbExamId = selectedId;
         renderHubLeaderboard(selectedId);
         if (state.currentUser.role === "admin" && state.broadcastLeaderboardExamId) {
           state.broadcastLeaderboardExamId = selectedId;
@@ -4291,8 +4788,12 @@
 
       document.getElementById("btn-save-exam-meta").addEventListener("click", () => {
         const ex = getEditorExam();
+        if (!ex) return;
         const newTitle = document.getElementById("editor-exam-title").value.trim();
-        const newDur = Math.max(5, Math.min(180, Number(document.getElementById("editor-exam-duration").value) || 60));
+        const newSubject = document.getElementById("editor-exam-subject").value || "toan";
+        const newDur = Math.max(5, Math.min(300, Number(document.getElementById("editor-exam-duration").value) || 60));
+        const newMaxScore = Math.max(1, Math.min(1000, Number(document.getElementById("editor-exam-max-score").value) || 10));
+        const newUseIRT = !!document.getElementById("editor-exam-use-irt").checked;
         const newOpenTime = document.getElementById("editor-exam-open-time").value || "";
         const newDeadline = document.getElementById("editor-exam-deadline").value || "";
         if (newOpenTime && newDeadline && new Date(newOpenTime).getTime() >= new Date(newDeadline).getTime()) {
@@ -4300,13 +4801,17 @@
           return;
         }
         if (newTitle) ex.title = newTitle;
+        ex.subject = newSubject;
         ex.durationMinutes = newDur;
+        ex.maxScore = newMaxScore;
+        ex.useIRT = newUseIRT;
         ex.openTime = newOpenTime;
         ex.deadline = newDeadline;
+        regradeExamLeaderboard(ex);
         if (state.activeExamId === ex.examId) syncActiveExamIntoWorkspace(!state.submitted);
         saveAndSyncAllDevices();
         renderEditorView();
-        showToast(`Đã lưu & đồng bộ lịch mở/đóng đề (${newDur} phút)!`);
+        showToast(`Đã lưu cài đặt (${getSubjectLabel(newSubject)} • Max ${newMaxScore}đ • ${newUseIRT ? "Bật IRT" : "Chấm chuẩn"})!`);
       });
 
       document.getElementById("btn-clear-open-time").addEventListener("click", () => {
@@ -4320,18 +4825,254 @@
         }
       });
 
-      document.getElementById("btn-editor-add-question").addEventListener("click", () => {
+      function addQuestionByPart(partNum) {
         const ex = getEditorExam();
+        if (!ex) return;
         const nextId = ex.questions.length + 1;
-        ex.questions.push({
-          id: nextId, part: 3, chapter: 2, topic: "Câu hỏi bổ sung Oxyz",
-          stem: "Trong không gian $Oxyz$ (đơn vị: mét), cho $A(1; 2; 3)$ và $B(4; 6; 3)$. Tính $AB$.",
-          correct: "5",
-          explanation: "$AB = 5\\text{ m}$."
-        });
-        saveAndSyncAllDevices();
+        if (partNum === 1) {
+          ex.questions.push({
+            id: nextId, part: 1, chapter: 1, topic: "Trắc nghiệm mới",
+            points: 0.25, irtDifficulty: 0,
+            stem: `Nội dung câu hỏi trắc nghiệm số ${nextId}...`,
+            options: ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
+            correct: 0,
+            explanation: "Hướng dẫn giải chi tiết..."
+          });
+        } else if (partNum === 2) {
+          ex.questions.push({
+            id: nextId, part: 2, chapter: 1, topic: "Đúng/Sai mới",
+            points: 1.0, irtDifficulty: 0.5,
+            stem: `Nội dung câu hỏi Đúng/Sai số ${nextId}...`,
+            statements: ["Phát biểu a)", "Phát biểu b)", "Phát biểu c)", "Phát biểu d)"],
+            correct: [true, true, false, false],
+            explanation: "Hướng dẫn giải chi tiết từng ý..."
+          });
+        } else {
+          ex.questions.push({
+            id: nextId, part: 3, chapter: 1, topic: "Trả lời ngắn mới",
+            points: 0.5, irtDifficulty: 1.0,
+            stem: `Nội dung câu hỏi trả lời ngắn số ${nextId}...`,
+            correct: "0",
+            explanation: "Hướng dẫn giải chi tiết..."
+          });
+        }
+        saveAndSyncAllDevices(true);
         renderEditorView();
-        showToast(`Đã thêm Câu ${nextId} & đồng bộ tới mọi thiết bị!`);
+        showToast(`Đã thêm Câu ${nextId} (Phần ${partNum === 1 ? "I" : partNum === 2 ? "II" : "III"}) & đồng bộ!`);
+      }
+
+      document.getElementById("btn-editor-add-question").addEventListener("click", () => addQuestionByPart(3));
+      document.getElementById("btn-editor-add-mc").addEventListener("click", () => addQuestionByPart(1));
+      document.getElementById("btn-editor-add-tf").addEventListener("click", () => addQuestionByPart(2));
+      document.getElementById("btn-editor-add-sa").addEventListener("click", () => addQuestionByPart(3));
+
+      // Hub Subject Filter, Search, & Pagination
+      document.querySelectorAll(".subject-tab").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.activeSubjectFilter = btn.dataset.subject || "all";
+          state.hubPage = 1;
+          document.querySelectorAll(".subject-tab").forEach((b) => {
+            b.className = b.dataset.subject === state.activeSubjectFilter
+              ? "subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-blue-800 text-white transition"
+              : "subject-tab px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+          });
+          renderHubView();
+        });
+      });
+
+      document.getElementById("hub-exam-search").addEventListener("input", (e) => {
+        state.hubSearchQuery = e.target.value || "";
+        state.hubPage = 1;
+        renderHubView();
+      });
+
+      document.getElementById("btn-hub-prev-page").addEventListener("click", () => {
+        if (state.hubPage > 1) { state.hubPage--; renderHubView(); }
+      });
+      document.getElementById("btn-hub-next-page").addEventListener("click", () => {
+        state.hubPage++;
+        renderHubView();
+      });
+
+      // Import Exam From File Parser & Modal Wiring
+      function parseExamTextToQuestions(rawText) {
+        const text = (rawText || "").trim();
+        if (!text) return [];
+        // 1. Try JSON format first
+        if (text.startsWith("{") || text.startsWith("[")) {
+          try {
+            const parsed = JSON.parse(text);
+            const arr = Array.isArray(parsed) ? parsed : (parsed.questions || []);
+            if (Array.isArray(arr) && arr.length > 0) {
+              return normalizeExamQuestions(arr);
+            }
+          } catch (e) {}
+        }
+        // 2. Parse Vietnamese Exam Text ("Câu 1:", "Bài 1:", etc.)
+        const blocks = text.split(/(?=^(?:Câu|Bài)\s+\d+\s*[:.])/im).map((b) => b.trim()).filter(Boolean);
+        const result = [];
+        blocks.forEach((blk) => {
+          const lines = blk.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+          if (lines.length === 0) return;
+          const firstLine = lines[0].replace(/^(?:Câu|Bài)\s+\d+\s*[:.]\s*/i, "");
+          const bodyLines = [firstLine];
+          const mcOpts = [];
+          const tfSts = [];
+          let ansLine = "";
+          let expLine = "";
+
+          for (let i = 1; i < lines.length; i++) {
+            const ln = lines[i];
+            if (/^([A-D])[.)]\s+/i.test(ln) && !/^Đáp/i.test(ln)) {
+              mcOpts.push(ln.replace(/^[A-D][.)]\s+/i, "").trim());
+            } else if (/^([a-d])[)]\s+/i.test(ln)) {
+              tfSts.push(ln.replace(/^[a-d][)]\s+/i, "").trim());
+            } else if (/^(?:Đáp\s*án|Đáp\s*số|DA|Key)\s*[:\-]/i.test(ln)) {
+              ansLine = ln.replace(/^(?:Đáp\s*án|Đáp\s*số|DA|Key)\s*[:\-]\s*/i, "").trim();
+            } else if (/^(?:Lời\s*giải|Giải|HD)\s*[:\-]/i.test(ln)) {
+              expLine = ln.replace(/^(?:Lời\s*giải|Giải|HD)\s*[:\-]\s*/i, "").trim();
+            } else {
+              bodyLines.push(ln);
+            }
+          }
+
+          const stem = bodyLines.join(" ").trim();
+          if (mcOpts.length >= 2) {
+            while (mcOpts.length < 4) mcOpts.push(`Phương án ${["A", "B", "C", "D"][mcOpts.length]}`);
+            const letterIdx = { A: 0, B: 1, C: 2, D: 3 }[(ansLine[0] || "A").toUpperCase()];
+            result.push({
+              id: result.length + 1, part: 1, chapter: 1, topic: "Nhập từ file",
+              points: 0.25, irtDifficulty: 0,
+              stem: stem, options: mcOpts.slice(0, 4),
+              correct: letterIdx !== undefined ? letterIdx : 0,
+              explanation: expLine || "Đáp án được nhập tự động từ file."
+            });
+          } else if (tfSts.length >= 2) {
+            while (tfSts.length < 4) tfSts.push(`Ý ${["a)", "b)", "c)", "d)"][tfSts.length]}`);
+            const bools = [true, true, false, false];
+            const tokens = ansLine.toUpperCase().match(/[ĐDSFT]/g);
+            if (tokens && tokens.length >= 4) {
+              for (let k = 0; k < 4; k++) {
+                bools[k] = tokens[k] === "Đ" || tokens[k] === "D" || tokens[k] === "T";
+              }
+            }
+            result.push({
+              id: result.length + 1, part: 2, chapter: 1, topic: "Nhập từ file",
+              points: 1.0, irtDifficulty: 0.5,
+              stem: stem, statements: tfSts.slice(0, 4),
+              correct: bools,
+              explanation: expLine || "Đáp án Đúng/Sai nhập từ file."
+            });
+          } else {
+            result.push({
+              id: result.length + 1, part: 3, chapter: 1, topic: "Nhập từ file",
+              points: 0.5, irtDifficulty: 1.0,
+              stem: stem,
+              correct: ansLine || "0",
+              explanation: expLine || "Đáp số nhập từ file."
+            });
+          }
+        });
+        return normalizeExamQuestions(result);
+      }
+
+      const importModal = document.getElementById("import-exam-modal");
+      const openImportModal = () => {
+        if (state.currentUser.role !== "admin") return;
+        importModal.classList.remove("hidden");
+        importModal.classList.add("flex");
+      };
+      const closeImportModal = () => {
+        importModal.classList.add("hidden");
+        importModal.classList.remove("flex");
+      };
+      document.getElementById("btn-import-exam-modal").addEventListener("click", openImportModal);
+      document.getElementById("btn-editor-import-file").addEventListener("click", openImportModal);
+      document.getElementById("btn-close-import-exam").addEventListener("click", closeImportModal);
+      document.getElementById("btn-cancel-import-exam").addEventListener("click", closeImportModal);
+
+      document.getElementById("import-exam-file-input").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (!document.getElementById("import-exam-title").value.trim()) {
+          document.getElementById("import-exam-title").value = file.name.replace(/\.[^.]+$/, "");
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const content = String(ev.target.result || "");
+          document.getElementById("import-exam-raw-text").value = content;
+          const qs = parseExamTextToQuestions(content);
+          document.getElementById("import-parse-preview").textContent =
+            qs.length > 0
+              ? `✅ Đã nhận diện ${qs.length} câu hỏi từ "${file.name}" (${qs.filter(q=>q.part===1).length} P.I • ${qs.filter(q=>q.part===2).length} P.II • ${qs.filter(q=>q.part===3).length} P.III).`
+              : "⚠️ Chưa nhận diện được câu hỏi. Kiểm tra lại định dạng 'Câu 1: ... A. ... B. ...'.";
+        };
+        reader.readAsText(file);
+      });
+
+      document.getElementById("import-exam-raw-text").addEventListener("input", (e) => {
+        const qs = parseExamTextToQuestions(e.target.value);
+        document.getElementById("import-parse-preview").textContent =
+          qs.length > 0
+            ? `✅ Nhận diện ${qs.length} câu hỏi (${qs.filter(q=>q.part===1).length} P.I • ${qs.filter(q=>q.part===2).length} P.II • ${qs.filter(q=>q.part===3).length} P.III).`
+            : "Sẵn sàng phân tích nội dung đề từ file hoặc văn bản.";
+      });
+
+      document.getElementById("btn-fill-import-sample").addEventListener("click", () => {
+        const sample = `Câu 1: Hàm số $y = x^3 - 3x$ đạt cực đại tại điểm nào?
+A. $x = -1$
+B. $x = 1$
+C. $x = 0$
+D. $x = 2$
+Đáp án: A
+
+Câu 2: Trong dao động điều hòa $x = 4\cos(2\pi t)$ cm:
+a) Biên độ dao động là 4 cm.
+b) Chu kì dao động là 1 s.
+c) Pha ban đầu bằng $\pi$.
+d) Vận tốc cực đại là $8\pi$ cm/s.
+Đáp án: Đ Đ S Đ
+
+Câu 3: Tính khối lượng muối thu được khi cho 2,7g Al tác dụng hết với HCl dư.
+Đáp số: 13.35`;
+        document.getElementById("import-exam-raw-text").value = sample;
+        const qs = parseExamTextToQuestions(sample);
+        document.getElementById("import-parse-preview").textContent =
+          `✅ Nhận diện ${qs.length} câu hỏi (${qs.filter(q=>q.part===1).length} P.I • ${qs.filter(q=>q.part===2).length} P.II • ${qs.filter(q=>q.part===3).length} P.III).`;
+      });
+
+      document.getElementById("btn-confirm-import-exam").addEventListener("click", () => {
+        const raw = document.getElementById("import-exam-raw-text").value;
+        const qs = parseExamTextToQuestions(raw);
+        if (qs.length === 0) {
+          showToast("Chưa có câu hỏi hợp lệ để tạo đề!");
+          return;
+        }
+        const subj = document.getElementById("import-exam-subject").value || "toan";
+        const dur = Math.max(5, Math.min(300, Number(document.getElementById("import-exam-duration").value) || 60));
+        const maxSc = Math.max(1, Math.min(1000, Number(document.getElementById("import-exam-max-score").value) || 10));
+        const title = document.getElementById("import-exam-title").value.trim() || `Đề ${getSubjectLabel(subj)} nhập từ file (${qs.length} câu)`;
+
+        const newExamId = `de-${Date.now()}`;
+        state.exams.unshift({
+          examId: newExamId,
+          subject: subj,
+          title: title,
+          durationMinutes: dur,
+          maxScore: maxSc,
+          useIRT: false,
+          openTime: "",
+          deadline: "",
+          questions: qs,
+          leaderboard: []
+        });
+        state.editorExamId = newExamId;
+        state.activeExamId = newExamId;
+        syncActiveExamIntoWorkspace(true);
+        saveAndSyncAllDevices(true);
+        closeImportModal();
+        switchMainView("editor");
+        showToast(`✅ Đã tạo "${title}" với ${qs.length} câu từ file!`);
       });
 
       // Create New Exam Modal
@@ -4391,6 +5132,7 @@
         if (!pendingDeleteExamId || state.currentUser.role !== "admin") return;
         const target = state.exams.find((e) => e.examId === pendingDeleteExamId);
         const deletedTitle = target ? target.title : "Đề thi";
+        ExamPersistenceDB.deleteExamIDB(pendingDeleteExamId);
         state.exams = state.exams.filter((e) => e.examId !== pendingDeleteExamId);
 
         if (state.exams.length > 0) {
@@ -4419,23 +5161,35 @@
       document.getElementById("btn-cancel-create-exam").addEventListener("click", closeCreateExamModal);
 
       document.getElementById("btn-confirm-create-exam").addEventListener("click", () => {
-        const title = document.getElementById("create-exam-title").value.trim() || `Đề số ${state.exams.length + 1}`;
-        const dur = Math.max(5, Math.min(180, Number(document.getElementById("create-exam-duration").value) || 60));
+        const subj = document.getElementById("create-exam-subject").value || "toan";
+        const title = document.getElementById("create-exam-title").value.trim() || `${getSubjectLabel(subj)} – Đề số ${state.exams.length + 1}`;
+        const dur = Math.max(5, Math.min(300, Number(document.getElementById("create-exam-duration").value) || 60));
+        const maxSc = Math.max(1, Math.min(1000, Number(document.getElementById("create-exam-max-score").value) || 10));
+        const useIRT = !!document.getElementById("create-exam-use-irt").checked;
         const openTime = document.getElementById("create-exam-open-time").value || "";
         const deadline = document.getElementById("create-exam-deadline").value || "";
         const tpl = document.getElementById("create-exam-template").value;
-        let subset = null;
-        if (tpl === "fast12") subset = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 22];
-        else if (tpl === "custom6") subset = [1, 5, 10, 13, 17, 22];
 
-        const newExamId = `de-${Date.now()}`;
-        state.exams.push({
+        let qs = [];
+        if (tpl === "empty1") {
+          qs = cloneQuestions([1], subj);
+        } else if (tpl === "fast12" && subj === "toan") {
+          qs = cloneQuestions([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 22], "toan");
+        } else {
+          qs = cloneQuestions(null, subj);
+        }
+
+        const newExamId = `de-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`;
+        state.exams.unshift({
           examId: newExamId,
+          subject: subj,
           title: title,
           durationMinutes: dur,
+          maxScore: maxSc,
+          useIRT: useIRT,
           openTime: openTime,
           deadline: deadline,
-          questions: cloneQuestions(subset),
+          questions: qs,
           leaderboard: []
         });
         state.editorExamId = newExamId;
