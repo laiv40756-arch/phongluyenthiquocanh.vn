@@ -12,6 +12,9 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <script src="https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -189,6 +192,9 @@
       <nav class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
         <button id="nav-tab-hub" type="button" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-blue-900 shadow-sm transition">
           🏠 Kho Đề &amp; BXH
+        </button>
+        <button id="nav-tab-creator" type="button" class="hidden px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition">
+          ✨ Tạo &amp; Xuất Đề
         </button>
         <button id="nav-tab-editor" type="button" class="hidden px-3 py-1.5 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition">
           🛠️ Quản Trị Đề
@@ -570,6 +576,31 @@
           </div>
         </div>
 
+        <!-- Post-Exam Score & Wrong-Answer Concentration Charts -->
+        <div class="mt-5 pt-5 border-t border-white/20 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-sm sm:text-base font-extrabold text-white">📊 BIỂU ĐỒ PHÂN TÍCH ĐIỂM SỐ &amp; VÙNG LỖI SAI TẬP TRUNG</span>
+            <span id="wrong-hotspot-summary" class="px-3 py-1 text-xs font-bold rounded-full bg-rose-500/25 text-rose-100 border border-rose-300/40">
+              Đang phân tích vùng sai...
+            </span>
+          </div>
+          <div id="scoring-policy-breakdown" class="hidden bg-white/10 rounded-xl px-3.5 py-2 text-xs text-amber-200 border border-amber-300/30"></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white/95 text-slate-900 rounded-2xl p-4 shadow-inner">
+              <div class="text-xs font-extrabold text-slate-700 mb-2">Biểu đồ điểm đạt được theo từng phần</div>
+              <div class="relative h-56">
+                <canvas id="chart-score-breakdown"></canvas>
+              </div>
+            </div>
+            <div class="bg-white/95 text-slate-900 rounded-2xl p-4 shadow-inner">
+              <div class="text-xs font-extrabold text-slate-700 mb-2">Biểu đồ số câu sai tập trung ở đâu (theo phần &amp; chủ đề)</div>
+              <div class="relative h-56">
+                <canvas id="chart-wrong-concentration"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Instant Leaderboard -->
         <div class="mt-6 pt-5 border-t border-white/20">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -681,6 +712,184 @@
   </div>
 
   <!-- ========================================================= -->
+  <!-- VIEW 2.5: INDEPENDENT EXAM CREATOR & PUBLISH WORKFLOW     -->
+  <!-- ========================================================= -->
+  <section id="view-creator" class="hidden view-animate max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <!-- Top Step Progress Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <span class="px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider rounded-full bg-blue-100 text-blue-800">
+            Không Gian Tạo Đề Độc Lập (Chưa Hiển Thị Lên Web)
+          </span>
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">
+            ✨ Soạn Đề Thi Mới &amp; Xuất Bản Lên Phòng Luyện
+          </h2>
+          <p class="text-xs text-slate-500">
+            Đề đang soạn nằm ở chế độ bản nháp độc lập — chỉ xuất hiện cho học sinh sau khi bạn hoàn tất bước <strong>Xuất Đề</strong>.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span id="creator-step1-pill" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-blue-800 text-white">
+            Bước 1: Soạn / Nhập Đề
+          </span>
+          <span class="text-slate-400 font-bold">→</span>
+          <span id="creator-step2-pill" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">
+            Bước 2: Xuất Đề Lên Web
+          </span>
+          <button id="btn-open-irt-guide-creator" type="button" class="px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-bold transition">
+            📖 Giải thích IRT &amp; Chấm điểm
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 1: INDEPENDENT DRAFT BUILDER -->
+      <div id="creator-step-1" class="space-y-5">
+        <!-- Quick Templates & Multi-Format File Upload (.docx, .pdf, .txt, .md, .json, .csv) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <div class="lg:col-span-6 bg-blue-50/60 border border-blue-200 rounded-2xl p-4 space-y-3">
+            <div class="text-xs font-extrabold text-blue-950 uppercase">📋 1. Chọn Mẫu Đề Chuẩn (Khởi tạo nhanh):</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button id="btn-tpl-12-4-6" type="button" class="p-2.5 rounded-xl bg-white hover:bg-blue-800 hover:text-white border border-blue-300 text-left transition group">
+                <div class="text-xs font-extrabold">Mẫu 22 câu</div>
+                <div class="text-[11px] opacity-80 mt-0.5">12 TN • 4 Đ/S • 6 TLN</div>
+              </button>
+              <button id="btn-tpl-18-4-6" type="button" class="p-2.5 rounded-xl bg-white hover:bg-indigo-800 hover:text-white border border-indigo-300 text-left transition group">
+                <div class="text-xs font-extrabold">Mẫu 28 câu</div>
+                <div class="text-[11px] opacity-80 mt-0.5">18 TN • 4 Đ/S • 6 TLN</div>
+              </button>
+              <button id="btn-tpl-blank" type="button" class="p-2.5 rounded-xl bg-white hover:bg-slate-800 hover:text-white border border-slate-300 text-left transition group">
+                <div class="text-xs font-extrabold">Đề trống</div>
+                <div class="text-[11px] opacity-80 mt-0.5">Tự thêm từng câu</div>
+              </button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-6 bg-teal-50/60 border border-teal-200 rounded-2xl p-4 space-y-2.5">
+            <div class="text-xs font-extrabold text-teal-950 uppercase">📄 2. Hoặc Nhập Đề Từ File (Word .docx, PDF .pdf, TXT, MD, JSON, CSV):</div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="creator-file-input" type="file" accept=".docx,.pdf,.txt,.md,.json,.csv,.html" class="block flex-1 text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-700 file:text-white hover:file:bg-teal-800" />
+            </div>
+            <div id="creator-file-status" class="text-[11px] font-semibold text-teal-800">
+              Hỗ trợ trích xuất tự động câu hỏi từ file Word (.docx), PDF (.pdf), văn bản thuần (.txt/.md), JSON và CSV.
+            </div>
+          </div>
+        </div>
+
+        <!-- Exam Metadata Form -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-end bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="md:col-span-5">
+            <label for="creator-title" class="block text-xs font-bold text-slate-700 mb-1">Tên đề thi mới *</label>
+            <input id="creator-title" type="text" placeholder="VD: Đề Thi Thử Toán 12 – Chuẩn 22 Câu..." class="w-full text-sm font-semibold px-3 py-2 rounded-xl border border-slate-300 bg-white" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="creator-subject" class="block text-xs font-bold text-slate-700 mb-1">Môn học</label>
+            <select id="creator-subject" class="w-full text-xs sm:text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white">
+              <option value="toan">📐 Toán Học</option>
+              <option value="ly">⚡ Vật Lý</option>
+              <option value="hoa">🧪 Hóa Học</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label for="creator-duration" class="block text-xs font-bold text-slate-700 mb-1">Thời lượng (phút)</label>
+            <input id="creator-duration" type="number" min="5" max="300" value="90" class="w-full text-sm font-bold px-3 py-2 rounded-xl border border-slate-300 bg-white" />
+          </div>
+          <div class="md:col-span-3">
+            <label for="creator-max-score" class="block text-xs font-bold text-blue-900 mb-1">🎯 Điểm tối đa của đề</label>
+            <input id="creator-max-score" type="number" step="0.5" min="1" max="1000" value="10" class="w-full text-sm font-extrabold px-3 py-2 rounded-xl border border-blue-300 bg-white text-blue-900" />
+          </div>
+
+          <div class="md:col-span-3">
+            <label for="creator-open-time" class="block text-xs font-bold text-emerald-700 mb-1">🟢 Cho phép vào từ</label>
+            <input id="creator-open-time" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-emerald-300 bg-white" />
+          </div>
+          <div class="md:col-span-3">
+            <label for="creator-deadline" class="block text-xs font-bold text-rose-700 mb-1">⏰ Kết thúc / Thu bài</label>
+            <input id="creator-deadline" type="datetime-local" class="w-full text-xs font-semibold px-2.5 py-2 rounded-xl border border-rose-300 bg-white" />
+          </div>
+          <div class="md:col-span-6 flex flex-wrap items-center gap-2">
+            <label class="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-300 bg-purple-50/70 cursor-pointer">
+              <input id="creator-use-irt" type="checkbox" class="w-4 h-4 accent-purple-700 rounded" />
+              <span class="text-xs font-bold text-purple-900">Bật thuật toán IRT</span>
+            </label>
+            <label class="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-300 bg-amber-50/70 cursor-pointer">
+              <input id="creator-use-adaptive" type="checkbox" class="w-4 h-4 accent-amber-600 rounded" />
+              <span class="text-xs font-bold text-amber-950">Ít người đúng điểm cao + Phạt 5 sai→6 đúng</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Add Questions to Draft Toolbar + Proceed to Publish Step -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-extrabold text-emerald-950">➕ Thêm câu vào bản nháp (<span id="creator-q-count">0</span> câu):</span>
+            <button id="btn-creator-add-mc" type="button" class="px-3 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold transition">+ Trắc nghiệm</button>
+            <button id="btn-creator-add-tf" type="button" class="px-3 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition">+ Đúng / Sai</button>
+            <button id="btn-creator-add-sa" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition">+ Trả lời ngắn</button>
+          </div>
+          <button id="btn-go-to-export-step" type="button" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-800 to-indigo-800 hover:from-blue-900 hover:to-indigo-900 text-white text-xs sm:text-sm font-extrabold shadow-md transition">
+            📤 Chuyển Sang Bước Xuất Đề →
+          </button>
+        </div>
+
+        <!-- Draft Questions List -->
+        <div id="creator-questions-list" class="space-y-3.5"></div>
+      </div>
+
+      <!-- STEP 2: EXPORT / PUBLISH CONFIRMATION GATE -->
+      <div id="creator-step-2" class="hidden space-y-5">
+        <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white rounded-2xl p-6 space-y-4 shadow-lg">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="px-2.5 py-0.5 text-[11px] font-bold uppercase rounded-full bg-amber-400 text-slate-950">
+                BƯỚC XUẤT ĐỀ — KIỂM TRA TRƯỚC KHI ĐĂNG LÊN PHÒNG LUYỆN
+              </span>
+              <h3 id="export-preview-title" class="text-xl font-extrabold mt-2">Tên đề thi</h3>
+              <p id="export-preview-meta" class="text-xs sm:text-sm text-blue-200 mt-1">--</p>
+            </div>
+            <button id="btn-back-to-creator-step1" type="button" class="px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold border border-white/20 transition">
+              ← Quay Lại Chỉnh Sửa Nháp
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+            <div class="bg-white/10 rounded-xl p-3 border border-white/15">
+              <div class="text-[11px] text-blue-200 uppercase">Phần I (Trắc nghiệm)</div>
+              <div id="export-count-p1" class="text-lg font-extrabold mt-0.5">0 câu</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/15">
+              <div class="text-[11px] text-blue-200 uppercase">Phần II (Đúng/Sai)</div>
+              <div id="export-count-p2" class="text-lg font-extrabold mt-0.5">0 câu</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/15">
+              <div class="text-[11px] text-blue-200 uppercase">Phần III (TL Ngắn)</div>
+              <div id="export-count-p3" class="text-lg font-extrabold mt-0.5">0 câu</div>
+            </div>
+            <div class="bg-white/10 rounded-xl p-3 border border-white/15">
+              <div class="text-[11px] text-blue-200 uppercase">Chế độ chấm điểm</div>
+              <div id="export-scoring-mode" class="text-xs font-extrabold mt-1 text-amber-300">Chuẩn</div>
+            </div>
+          </div>
+
+          <div class="bg-white/10 rounded-xl p-3.5 text-xs text-blue-100 space-y-1 border border-white/15">
+            <div>✅ Đề thi hiện vẫn đang ở trạng thái <strong>Bản Nháp</strong> (học sinh chưa nhìn thấy).</div>
+            <div>✅ Sau khi bấm <strong>Xuất Đề Lên Phòng Luyện</strong>, đề sẽ lập tức xuất hiện trong Kho Đề và đồng bộ tới mọi thiết bị.</div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-3 pt-2">
+            <button id="btn-export-download-json" type="button" class="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold border border-white/25 transition">
+              💾 Tải File Đề (.json)
+            </button>
+            <button id="btn-confirm-publish-exam" type="button" class="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-extrabold shadow-lg transition">
+              🚀 Xác Nhận Xuất Đề Lên Phòng Luyện
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
   <!-- VIEW 3: ADMIN EDITOR (CHỈ GIÁO VIÊN / ADMIN THẤY)         -->
   <!-- ========================================================= -->
   <section id="view-editor" class="hidden view-animate max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -756,14 +965,21 @@
           <input id="editor-exam-max-score" type="number" step="0.5" min="1" max="1000" value="10" class="w-full text-xs sm:text-sm font-extrabold px-3 py-2 rounded-xl border border-blue-300 bg-white text-blue-900" />
         </div>
 
-        <div class="md:col-span-3">
-          <label class="block text-xs font-bold text-purple-900 mb-1">
-            🧠 Thuật toán chấm IRT
-          </label>
-          <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-purple-300 bg-purple-50/70 cursor-pointer select-none">
-            <input id="editor-exam-use-irt" type="checkbox" class="w-4 h-4 accent-purple-700 rounded" />
-            <span class="text-xs font-bold text-purple-900">Bật chấm điểm IRT</span>
-          </label>
+        <div class="md:col-span-3 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-purple-900">🧠 Chế độ chấm điểm nâng cao</label>
+            <button id="btn-open-irt-guide-editor" type="button" class="text-[10px] font-bold text-purple-700 hover:underline">📖 Giải thích IRT?</button>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-purple-300 bg-purple-50/70 cursor-pointer select-none">
+              <input id="editor-exam-use-irt" type="checkbox" class="w-3.5 h-3.5 accent-purple-700 rounded" />
+              <span class="text-[11px] font-bold text-purple-900">Bật thuật toán IRT</span>
+            </label>
+            <label class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-amber-300 bg-amber-50/70 cursor-pointer select-none" title="Câu càng ít người làm đúng điểm càng cao; 5 câu sai liên tiếp mà câu 6 đúng sẽ bị trừ bớt điểm">
+              <input id="editor-exam-use-adaptive" type="checkbox" class="w-3.5 h-3.5 accent-amber-600 rounded" />
+              <span class="text-[11px] font-bold text-amber-950">Hiếm điểm cao + Phạt 5 sai → 6 đúng</span>
+            </label>
+          </div>
         </div>
 
         <div class="md:col-span-3">
@@ -1030,7 +1246,7 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center font-bold">📄</span>
-          <h3 class="text-lg font-extrabold text-slate-900">Tạo Đề Thi Từ File (.txt, .md, .json, .csv)</h3>
+          <h3 class="text-lg font-extrabold text-slate-900">Tạo Đề Thi Từ File (Word .docx, PDF .pdf, TXT, MD, JSON, CSV)</h3>
         </div>
         <button id="btn-close-import-exam" type="button" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
       </div>
@@ -1061,9 +1277,9 @@
 
       <div class="bg-slate-50 p-3.5 rounded-xl border border-dashed border-slate-300 space-y-2">
         <label for="import-exam-file-input" class="block text-xs font-bold text-slate-700">
-          Chọn file đề thi từ máy (.txt, .md, .json, .csv):
+          Chọn file đề thi từ máy (Word .docx, PDF .pdf, TXT, MD, JSON, CSV):
         </label>
-        <input id="import-exam-file-input" type="file" accept=".txt,.md,.json,.csv" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-700 file:text-white hover:file:bg-teal-800" />
+        <input id="import-exam-file-input" type="file" accept=".docx,.pdf,.txt,.md,.json,.csv,.html" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-700 file:text-white hover:file:bg-teal-800" />
       </div>
 
       <div>
@@ -1212,6 +1428,54 @@
             📋 Copy Thông Báo
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed IRT & Smart Scoring Guide Modal -->
+  <div id="irt-guide-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/65 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="modal-animate bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-purple-200 space-y-4 my-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-lg">🧠</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Giải Thích Thuật Toán IRT &amp; Chấm Điểm Thông Minh</h3>
+            <p class="text-[11px] text-slate-500">Cơ chế đánh giá năng lực chuẩn ĐGNL &amp; chống đoán mò</p>
+          </div>
+        </div>
+        <button id="btn-close-irt-guide" type="button" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs sm:text-sm text-slate-700 leading-relaxed max-h-[65vh] overflow-y-auto custom-scrollbar pr-1">
+        <div class="bg-purple-50/70 p-4 rounded-2xl border border-purple-200 space-y-1.5">
+          <div class="font-extrabold text-purple-950">1. Thuật toán IRT (Item Response Theory – Lý thuyết Ứng đáp Câu hỏi) là gì?</div>
+          <p>Khác với cách chấm truyền thống (mọi câu đúng có trọng số cố định như nhau), <strong>IRT 2 tham số (2PL)</strong> ước lượng trực tiếp <strong>năng lực thực ($	heta$)</strong> của thí sinh dựa trên <em>độ khó ($b$)</em> và <em>độ phân biệt ($a$)</em> của từng câu hỏi:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li><strong>Độ khó $b \in [-3; +3]$:</strong> Câu dễ có $b < 0$, câu trung bình $b pprox 0$, câu vận dụng cao có $b > 1$.</li>
+            <li><strong>Xác suất làm đúng:</strong> $P_i(	heta) = rac{1}{1 + e^{-a_i(	heta - b_i)}}$. Làm đúng câu có $b$ cao giúp $	heta$ tăng mạnh hơn nhiều so với làm đúng câu dễ.</li>
+            <li><strong>Quy đổi điểm:</strong> Từ $	heta$ ước lượng bằng Newton-Raphson MAP, hệ thống tính điểm kỳ vọng trên Đường đặc trưng đề thi (TCC) và quy đổi chính xác về <strong>Điểm tối đa</strong> bạn cài đặt.</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 space-y-1.5">
+          <div class="font-extrabold text-amber-950">2. Chấm điểm theo độ hiếm (Câu càng ít người làm được điểm càng cao)</div>
+          <p>Khi bật chế độ <strong>Ít người đúng điểm cao</strong>, hệ thống tự động thống kê tỷ lệ thí sinh làm đúng $p_i$ của từng câu trên BXH:</p>
+          <ul class="list-disc pl-5 space-y-1 text-xs">
+            <li>Trọng số câu $i$: $w_i = 1 + 0,8 	imes (1 - p_i)$.</li>
+            <li>Ví dụ: Câu mà 95% thí sinh làm đúng có hệ số $1,04	imes$, còn câu khó chỉ 10% thí sinh giải được sẽ có hệ số lên tới $1,72	imes$ rồi chuẩn hóa về điểm tối đa của đề.</li>
+          </ul>
+        </div>
+
+        <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-200 space-y-1.5">
+          <div class="font-extrabold text-rose-950">3. Quy tắc chống khoanh bừa: 5 câu sai liên tiếp → câu thứ 6 đúng bị trừ bớt điểm</div>
+          <p>Hệ thống quét thứ tự làm bài từ Câu 1 đến câu cuối. Nếu thí sinh <strong>sai liên tiếp từ 5 câu trở lên</strong> rồi đột ngột làm đúng ở câu kế tiếp (câu thứ 6), hệ thống đánh dấu nghi vấn khoanh bừa/đoán mò và <strong>tự động trừ 50% số điểm của câu thứ 6 đó</strong>, đồng thời hiển thị rõ danh sách các câu bị trừ trong phiếu điểm.</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-1">
+        <button id="btn-close-irt-guide-2" type="button" class="px-5 py-2 rounded-xl bg-purple-800 hover:bg-purple-900 text-white text-xs font-bold transition">
+          Đã hiểu
+        </button>
       </div>
     </div>
   </div>
@@ -1571,6 +1835,7 @@
         durationMinutes: 90,
         maxScore: 10,
         useIRT: false,
+        useAdaptiveScoring: false,
         openTime: "",
         deadline: "",
         questions: cloneQuestions(null, "toan"),
@@ -1583,6 +1848,7 @@
         durationMinutes: 45,
         maxScore: 10,
         useIRT: false,
+        useAdaptiveScoring: false,
         openTime: "",
         deadline: "",
         questions: cloneQuestions([1, 4, 5, 6, 8, 10, 13, 15, 17, 19, 20, 22], "toan"),
@@ -1595,6 +1861,7 @@
         durationMinutes: 45,
         maxScore: 10,
         useIRT: false,
+        useAdaptiveScoring: false,
         openTime: "",
         deadline: "",
         questions: cloneQuestions(null, "ly"),
@@ -1607,6 +1874,7 @@
         durationMinutes: 45,
         maxScore: 10,
         useIRT: false,
+        useAdaptiveScoring: false,
         openTime: "",
         deadline: "",
         questions: cloneQuestions(null, "hoa"),
@@ -1824,7 +2092,8 @@
       hubSearchQuery: "",
       hubPage: 1,
       hubPageSize: 10,
-      activeView: "hub", // "hub" | "start" | "exam" | "editor" | "accounts"
+      activeView: "hub", // "hub" | "start" | "exam" | "creator" | "editor" | "accounts"
+      creatorDraft: null,
       questions: [],
       mcAnswers: {},
       tfAnswers: {},
@@ -1951,7 +2220,8 @@
           document.getElementById("score-part1").textContent = `${myEntry.p1.toFixed(2).replace(".", ",")}đ`;
           document.getElementById("score-part2").textContent = `${myEntry.p2.toFixed(2).replace(".", ",")}đ`;
           document.getElementById("score-part3").textContent = `${myEntry.p3.toFixed(2).replace(".", ",")}đ`;
-          renderLeaderboardTable();
+          renderPostExamAnalyticsCharts(ex, scored, state.mcAnswers, state.tfAnswers, state.saAnswers);
+      renderLeaderboardTable();
         }
         document.getElementById("lock-solutions-badge").classList.add("hidden");
         document.getElementById("btn-toggle-all-solutions").classList.remove("hidden");
@@ -3223,6 +3493,7 @@
     // Strict Role-Based Visibility: Students ONLY see Exams & Leaderboard!
     function updateRoleUI() {
       const isAdmin = state.currentUser.role === "admin";
+      const navCreator = document.getElementById("nav-tab-creator");
       const navEditor = document.getElementById("nav-tab-editor");
       const navAccounts = document.getElementById("nav-tab-accounts");
       const kpiStrip = document.getElementById("hub-admin-kpi-strip");
@@ -3230,6 +3501,7 @@
 
       const btnBroadcastLb = document.getElementById("btn-broadcast-lb");
       if (isAdmin) {
+        if (navCreator) navCreator.classList.remove("hidden");
         navEditor.classList.remove("hidden");
         navAccounts.classList.remove("hidden");
         kpiStrip.classList.remove("hidden");
@@ -3237,6 +3509,7 @@
         if (btnBroadcastLb) btnBroadcastLb.classList.remove("hidden");
         const btnImp = document.getElementById("btn-import-exam-modal"); if (btnImp) btnImp.classList.remove("hidden");
       } else {
+        if (navCreator) navCreator.classList.add("hidden");
         navEditor.classList.add("hidden");
         navAccounts.classList.add("hidden");
         kpiStrip.classList.add("hidden");
@@ -3247,7 +3520,7 @@
     }
 
     function switchMainView(viewName) {
-      if ((viewName === "editor" || viewName === "accounts") && state.currentUser.role !== "admin") {
+      if ((viewName === "creator" || viewName === "editor" || viewName === "accounts") && state.currentUser.role !== "admin") {
         showToast("Chỉ Giáo viên / Admin mới có quyền truy cập mục này!");
         return;
       }
@@ -3256,6 +3529,7 @@
         hub: document.getElementById("view-hub"),
         start: document.getElementById("view-start-exam"),
         exam: document.getElementById("view-exam"),
+        creator: document.getElementById("view-creator"),
         editor: document.getElementById("view-editor"),
         accounts: document.getElementById("view-accounts")
       };
@@ -3267,6 +3541,7 @@
 
       const navBtns = {
         hub: document.getElementById("nav-tab-hub"),
+        creator: document.getElementById("nav-tab-creator"),
         editor: document.getElementById("nav-tab-editor"),
         accounts: document.getElementById("nav-tab-accounts")
       };
@@ -3306,6 +3581,7 @@
         renderHubView();
       }
       if (viewName === "start") renderStartExamView();
+      if (viewName === "creator") renderCreatorView();
       if (viewName === "editor") renderEditorView();
       if (viewName === "accounts") renderAccountsView();
     }
@@ -3684,55 +3960,102 @@
       return 0;
     }
 
-    // 2PL IRT Ability Estimation (Newton-Raphson MLE) -> mapped cleanly to [0, ex.maxScore]
+    // 2PL IRT + Adaptive Rarity Weighting (càng ít người làm đúng điểm càng cao) + 5-Wrong-Streak -> 6th-Right Penalty
     function computeExamScoreWithOptionalIRT(ex, mcMap, tfMap, saMap) {
       const qs = ex.questions || [];
       const maxScore = Number(ex.maxScore) || 10;
+      const useIRT = !!ex.useIRT;
+      const useAdaptive = !!ex.useAdaptiveScoring;
+
+      // Compute empirical solve rate p_i across existing leaderboard submissions for rarity weighting
+      const lb = Array.isArray(ex.leaderboard) ? ex.leaderboard.filter((e) => e && e.rawAnswers) : [];
+      const solveRates = {};
+      if (useAdaptive) {
+        qs.forEach((q) => {
+          const qMax = q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part);
+          if (lb.length >= 2 && qMax > 0) {
+            let sumRatio = 0;
+            lb.forEach((entry) => {
+              const sVal = computeQuestionScore(q, entry.rawAnswers.mc, entry.rawAnswers.tf, entry.rawAnswers.sa);
+              sumRatio += Math.min(1, Math.max(0, sVal / qMax));
+            });
+            solveRates[q.id] = Math.max(0.05, Math.min(1, sumRatio / lb.length));
+          } else {
+            // Fallback prior from irtDifficulty when fewer than 2 submissions exist
+            const b = q.irtDifficulty !== undefined ? Number(q.irtDifficulty) : 0;
+            solveRates[q.id] = 1 / (1 + Math.exp(b));
+          }
+        });
+      }
+
       let p1 = 0, p2 = 0, p3 = 0;
       let rawSum = 0, rawMax = 0;
-
+      let consecutiveWrong = 0;
+      let rawStreakPenalty = 0;
+      const penalizedQuestionIds = [];
       const responses = [];
+
       qs.forEach((q) => {
         const qMax = q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part);
-        const sc = computeQuestionScore(q, mcMap, tfMap, saMap);
-        rawSum += sc;
-        rawMax += qMax;
-        if (q.part === 1) p1 += sc;
-        if (q.part === 2) p2 += sc;
-        if (q.part === 3) p3 += sc;
+        const rarityMult = useAdaptive ? (1 + (1 - (solveRates[q.id] || 0.5)) * 0.8) : 1.0;
+        const effectiveMax = qMax * rarityMult;
+        const baseSc = computeQuestionScore(q, mcMap, tfMap, saMap);
+        let earned = baseSc * rarityMult;
 
-        const u = qMax > 0 ? Math.min(1, Math.max(0, sc / qMax)) : 0;
+        if (useAdaptive) {
+          if (baseSc <= 0) {
+            consecutiveWrong++;
+          } else {
+            if (consecutiveWrong >= 5) {
+              const deduction = earned * 0.5;
+              earned -= deduction;
+              rawStreakPenalty += deduction;
+              penalizedQuestionIds.push(q.id);
+            }
+            consecutiveWrong = 0;
+          }
+        }
+
+        rawSum += earned;
+        rawMax += effectiveMax;
+        if (q.part === 1) p1 += earned;
+        if (q.part === 2) p2 += earned;
+        if (q.part === 3) p3 += earned;
+
+        const u = effectiveMax > 0 ? Math.min(1, Math.max(0, earned / effectiveMax)) : 0;
         const b = q.irtDifficulty !== undefined ? Number(q.irtDifficulty) : 0;
-        const a = q.part === 3 ? 1.4 : q.part === 2 ? 1.2 : 1.0; // Discrimination parameter
+        const a = q.part === 3 ? 1.4 : q.part === 2 ? 1.2 : 1.0;
         responses.push({ u, a, b });
       });
 
-      if (!ex.useIRT || qs.length === 0) {
-        const scale = rawMax > 0 ? (maxScore / rawMax) : 1;
+      const scale = rawMax > 0 ? (maxScore / rawMax) : 1;
+      const scaledPenalty = rawStreakPenalty * scale;
+
+      if (!useIRT || qs.length === 0) {
         return {
-          total: rawSum * scale,
+          total: Math.max(0, rawSum * scale),
           p1: p1 * scale,
           p2: p2 * scale,
           p3: p3 * scale,
           theta: null,
-          usedIRT: false
+          usedIRT: false,
+          usedAdaptive: useAdaptive,
+          streakPenaltyTotal: scaledPenalty,
+          penalizedQuestionIds
         };
       }
 
-      // Check all-zero or all-full boundary cases
       if (rawSum <= 0) {
-        return { total: 0, p1: 0, p2: 0, p3: 0, theta: -3.0, usedIRT: true };
+        return { total: 0, p1: 0, p2: 0, p3: 0, theta: -3.0, usedIRT: true, usedAdaptive: useAdaptive, streakPenaltyTotal: 0, penalizedQuestionIds };
       }
-      if (rawMax > 0 && Math.abs(rawSum - rawMax) < 1e-6) {
-        const scale = maxScore / rawMax;
-        return { total: maxScore, p1: p1 * scale, p2: p2 * scale, p3: p3 * scale, theta: 3.0, usedIRT: true };
+      if (rawMax > 0 && Math.abs(rawSum - rawMax) < 1e-6 && scaledPenalty <= 0) {
+        return { total: maxScore, p1: p1 * scale, p2: p2 * scale, p3: p3 * scale, theta: 3.0, usedIRT: true, usedAdaptive: useAdaptive, streakPenaltyTotal: 0, penalizedQuestionIds };
       }
 
-      // Newton-Raphson with Bayesian MAP prior N(0, 1) for numerical stability
       let theta = 0;
       for (let iter = 0; iter < 15; iter++) {
-        let d1 = -theta; // Prior derivative
-        let d2 = -1;     // Prior 2nd derivative
+        let d1 = -theta;
+        let d2 = -1;
         responses.forEach((item) => {
           const z = item.a * (theta - item.b);
           const p = 1 / (1 + Math.exp(-Math.max(-20, Math.min(20, z))));
@@ -3745,13 +4068,12 @@
         if (Math.abs(step) < 1e-4) break;
       }
 
-      // Expected proportion on test characteristic curve (TCC) at estimated theta
       let tccSum = 0;
       responses.forEach((item) => {
         const z = item.a * (theta - item.b);
         tccSum += 1 / (1 + Math.exp(-Math.max(-20, Math.min(20, z))));
       });
-      const irtTotal = (tccSum / responses.length) * maxScore;
+      const irtTotal = Math.max(0, (tccSum / responses.length) * maxScore - scaledPenalty);
       const partSum = p1 + p2 + p3;
       const pScale = partSum > 0 ? (irtTotal / partSum) : 0;
 
@@ -3761,8 +4083,136 @@
         p2: p2 * pScale,
         p3: p3 * pScale,
         theta: theta,
-        usedIRT: true
+        usedIRT: true,
+        usedAdaptive: useAdaptive,
+        streakPenaltyTotal: scaledPenalty,
+        penalizedQuestionIds
       };
+    }
+
+    let scoreChartInstance = null;
+    let wrongChartInstance = null;
+
+    function renderPostExamAnalyticsCharts(ex, scored, mcMap, tfMap, saMap) {
+      if (typeof window.Chart === "undefined" || !ex) return;
+      const qs = ex.questions || [];
+      const maxScore = Number(ex.maxScore) || 10;
+
+      // Compute max possible per part scaled to maxScore
+      let rawMaxP1 = 0, rawMaxP2 = 0, rawMaxP3 = 0;
+      const wrongByPart = { 1: 0, 2: 0, 3: 0 };
+      const wrongByTopic = {};
+
+      qs.forEach((q) => {
+        const qMax = q.points !== undefined ? Number(q.points) : getDefaultPointsForPart(q.part);
+        const sc = computeQuestionScore(q, mcMap, tfMap, saMap);
+        if (q.part === 1) rawMaxP1 += qMax;
+        if (q.part === 2) rawMaxP2 += qMax;
+        if (q.part === 3) rawMaxP3 += qMax;
+        if (sc < qMax - 1e-6) {
+          wrongByPart[q.part] = (wrongByPart[q.part] || 0) + 1;
+          const tLabel = `P.${q.part === 1 ? "I" : q.part === 2 ? "II" : "III"}: ${(q.topic || "Chung").slice(0, 24)}`;
+          wrongByTopic[tLabel] = (wrongByTopic[tLabel] || 0) + 1;
+        }
+      });
+
+      const totalRawMax = rawMaxP1 + rawMaxP2 + rawMaxP3 || 1;
+      const scFactor = maxScore / totalRawMax;
+      const maxP1 = Number((rawMaxP1 * scFactor).toFixed(2));
+      const maxP2 = Number((rawMaxP2 * scFactor).toFixed(2));
+      const maxP3 = Number((rawMaxP3 * scFactor).toFixed(2));
+
+      // Hotspot summary text
+      const hotspotEl = document.getElementById("wrong-hotspot-summary");
+      const totalWrong = wrongByPart[1] + wrongByPart[2] + wrongByPart[3];
+      if (hotspotEl) {
+        if (totalWrong === 0) {
+          hotspotEl.textContent = "🎯 Tuyệt đối! Không có câu sai nào.";
+        } else {
+          const partNames = { 1: "Phần I (Trắc nghiệm)", 2: "Phần II (Đúng/Sai)", 3: "Phần III (Trả lời ngắn)" };
+          const worstPart = [1, 2, 3].sort((a, b) => wrongByPart[b] - wrongByPart[a])[0];
+          hotspotEl.textContent = `⚠️ Sai ${totalWrong}/${qs.length} câu — Tập trung nhiều nhất ở ${partNames[worstPart]} (${wrongByPart[worstPart]} câu)`;
+        }
+      }
+
+      // Adaptive / IRT policy breakdown banner
+      const policyEl = document.getElementById("scoring-policy-breakdown");
+      if (policyEl) {
+        const notes = [];
+        if (scored.usedIRT) notes.push(`🧠 IRT 2PL: Năng lực θ = ${scored.theta !== null ? scored.theta.toFixed(2) : "0.00"}`);
+        if (scored.usedAdaptive) notes.push("💎 Trọng số độ hiếm: Câu ít người làm đúng được cộng hệ số điểm cao hơn");
+        if (scored.penalizedQuestionIds && scored.penalizedQuestionIds.length > 0) {
+          notes.push(`🚨 Phạt chuỗi 5 sai → câu 6 đúng: -${scored.streakPenaltyTotal.toFixed(2).replace(".", ",")}đ (tại Câu ${scored.penalizedQuestionIds.join(", ")})`);
+        }
+        if (notes.length > 0) {
+          policyEl.innerHTML = notes.join(" &nbsp;|&nbsp; ");
+          policyEl.classList.remove("hidden");
+        } else {
+          policyEl.classList.add("hidden");
+        }
+      }
+
+      // Chart 1: Score Breakdown
+      const ctx1 = document.getElementById("chart-score-breakdown");
+      if (ctx1) {
+        if (scoreChartInstance) { scoreChartInstance.destroy(); scoreChartInstance = null; }
+        scoreChartInstance = new window.Chart(ctx1, {
+          type: "bar",
+          data: {
+            labels: ["Phần I (TN)", "Phần II (Đ/S)", "Phần III (TLN)"],
+            datasets: [
+              {
+                label: "Điểm đạt được",
+                data: [Number(scored.p1.toFixed(2)), Number(scored.p2.toFixed(2)), Number(scored.p3.toFixed(2))],
+                backgroundColor: ["#2563eb", "#4f46e5", "#059669"],
+                borderRadius: 8
+              },
+              {
+                label: "Điểm tối đa",
+                data: [maxP1, maxP2, maxP3],
+                backgroundColor: ["#cbd5e1", "#cbd5e1", "#cbd5e1"],
+                borderRadius: 8
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      }
+
+      // Chart 2: Wrong Answers Concentration
+      const ctx2 = document.getElementById("chart-wrong-concentration");
+      if (ctx2) {
+        if (wrongChartInstance) { wrongChartInstance.destroy(); wrongChartInstance = null; }
+        const sortedTopics = Object.entries(wrongByTopic).sort((a, b) => b[1] - a[1]).slice(0, 6);
+        const labels2 = sortedTopics.length > 0 ? sortedTopics.map((x) => x[0]) : ["Phần I", "Phần II", "Phần III"];
+        const data2 = sortedTopics.length > 0 ? sortedTopics.map((x) => x[1]) : [0, 0, 0];
+        wrongChartInstance = new window.Chart(ctx2, {
+          type: "bar",
+          data: {
+            labels: labels2,
+            datasets: [
+              {
+                label: "Số câu sai / thiếu ý",
+                data: data2,
+                backgroundColor: "#e11d48",
+                borderRadius: 6
+              }
+            ]
+          },
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+          }
+        });
+      }
     }
 
     function updateSidebarAndStats() {
@@ -4229,6 +4679,8 @@
       document.getElementById("editor-exam-duration").value = ex.durationMinutes;
       document.getElementById("editor-exam-max-score").value = Number(ex.maxScore) || 10;
       document.getElementById("editor-exam-use-irt").checked = !!ex.useIRT;
+      const adaptiveEditorChk = document.getElementById("editor-exam-use-adaptive");
+      if (adaptiveEditorChk) adaptiveEditorChk.checked = !!ex.useAdaptiveScoring;
       document.getElementById("editor-exam-open-time").value = ex.openTime || "";
       document.getElementById("editor-exam-deadline").value = ex.deadline || "";
       document.getElementById("cfg-sync-room-id").value = state.syncRoomCode || "PHONG-QUOC-ANH";
@@ -4482,6 +4934,207 @@
       }, 1000);
     }
 
+    function buildStandardTemplateQuestions(mcCount, tfCount, saCount, subject) {
+      const basePool = cloneQuestions(null, subject || "toan");
+      const p1Pool = basePool.filter((q) => q.part === 1);
+      const p2Pool = basePool.filter((q) => q.part === 2);
+      const p3Pool = basePool.filter((q) => q.part === 3);
+      const out = [];
+
+      for (let i = 0; i < mcCount; i++) {
+        if (i < p1Pool.length) {
+          out.push(JSON.parse(JSON.stringify(p1Pool[i])));
+        } else {
+          out.push({
+            id: out.length + 1, part: 1, chapter: 1, topic: `${getSubjectLabel(subject)} - TN`,
+            points: 0.25, irtDifficulty: Number((-0.8 + (i / Math.max(1, mcCount)) * 2.0).toFixed(1)),
+            stem: `Câu hỏi trắc nghiệm số ${i + 1} (${getSubjectLabel(subject)}) — nhập nội dung đề bài...`,
+            options: ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
+            correct: 0,
+            explanation: "Hướng dẫn giải chi tiết..."
+          });
+        }
+      }
+      for (let i = 0; i < tfCount; i++) {
+        if (i < p2Pool.length) {
+          out.push(JSON.parse(JSON.stringify(p2Pool[i])));
+        } else {
+          out.push({
+            id: out.length + 1, part: 2, chapter: 1, topic: `${getSubjectLabel(subject)} - Đ/S`,
+            points: 1.0, irtDifficulty: 0.5,
+            stem: `Câu hỏi Đúng/Sai số ${i + 1} (${getSubjectLabel(subject)}) — nhập nội dung đề bài...`,
+            statements: ["Ý a) ...", "Ý b) ...", "Ý c) ...", "Ý d) ..."],
+            correct: [true, true, false, false],
+            explanation: "Hướng dẫn giải chi tiết..."
+          });
+        }
+      }
+      for (let i = 0; i < saCount; i++) {
+        if (i < p3Pool.length) {
+          out.push(JSON.parse(JSON.stringify(p3Pool[i])));
+        } else {
+          out.push({
+            id: out.length + 1, part: 3, chapter: 2, topic: `${getSubjectLabel(subject)} - TLN`,
+            points: 0.5, irtDifficulty: 1.1,
+            stem: `Câu hỏi Trả lời ngắn số ${i + 1} (${getSubjectLabel(subject)}) — nhập nội dung đề bài...`,
+            correct: "0",
+            explanation: "Hướng dẫn giải chi tiết..."
+          });
+        }
+      }
+      return normalizeExamQuestions(out);
+    }
+
+    function initFreshCreatorDraft(subject = "toan", templateMode = "22") {
+      let qs = [];
+      if (templateMode === "22") qs = buildStandardTemplateQuestions(12, 4, 6, subject);
+      else if (templateMode === "28") qs = buildStandardTemplateQuestions(18, 4, 6, subject);
+      state.creatorDraft = {
+        examId: `de-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        subject: subject,
+        title: `${getSubjectLabel(subject)} – Đề Mới (${templateMode === "28" ? "28 câu: 18 TN + 4 Đ/S + 6 TLN" : templateMode === "22" ? "22 câu: 12 TN + 4 Đ/S + 6 TLN" : "Tự soạn"})`,
+        durationMinutes: templateMode === "28" ? 90 : 60,
+        maxScore: 10,
+        useIRT: false,
+        useAdaptiveScoring: false,
+        openTime: "",
+        deadline: "",
+        questions: qs,
+        leaderboard: [],
+        step: 1
+      };
+    }
+
+    function syncCreatorFormIntoDraft() {
+      if (!state.creatorDraft) initFreshCreatorDraft("toan", "22");
+      const d = state.creatorDraft;
+      d.title = document.getElementById("creator-title").value.trim() || d.title;
+      d.subject = document.getElementById("creator-subject").value || "toan";
+      d.durationMinutes = Math.max(5, Math.min(300, Number(document.getElementById("creator-duration").value) || 60));
+      d.maxScore = Math.max(1, Math.min(1000, Number(document.getElementById("creator-max-score").value) || 10));
+      d.openTime = document.getElementById("creator-open-time").value || "";
+      d.deadline = document.getElementById("creator-deadline").value || "";
+      d.useIRT = !!document.getElementById("creator-use-irt").checked;
+      d.useAdaptiveScoring = !!document.getElementById("creator-use-adaptive").checked;
+    }
+
+    function renderCreatorView() {
+      if (!state.creatorDraft) initFreshCreatorDraft("toan", "22");
+      const d = state.creatorDraft;
+
+      document.getElementById("creator-title").value = d.title;
+      document.getElementById("creator-subject").value = d.subject || "toan";
+      document.getElementById("creator-duration").value = d.durationMinutes;
+      document.getElementById("creator-max-score").value = d.maxScore;
+      document.getElementById("creator-open-time").value = d.openTime || "";
+      document.getElementById("creator-deadline").value = d.deadline || "";
+      document.getElementById("creator-use-irt").checked = !!d.useIRT;
+      document.getElementById("creator-use-adaptive").checked = !!d.useAdaptiveScoring;
+      document.getElementById("creator-q-count").textContent = String(d.questions.length);
+
+      const step1El = document.getElementById("creator-step-1");
+      const step2El = document.getElementById("creator-step-2");
+      const pill1 = document.getElementById("creator-step1-pill");
+      const pill2 = document.getElementById("creator-step2-pill");
+
+      if (d.step === 2) {
+        step1El.classList.add("hidden");
+        step2El.classList.remove("hidden");
+        pill1.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-100 text-emerald-800";
+        pill2.className = "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-blue-800 text-white";
+
+        const p1 = d.questions.filter((q) => q.part === 1).length;
+        const p2 = d.questions.filter((q) => q.part === 2).length;
+        const p3 = d.questions.filter((q) => q.part === 3).length;
+        document.getElementById("export-preview-title").textContent = d.title;
+        document.getElementById("export-preview-meta").textContent =
+          `${getSubjectLabel(d.subject)} • Thời lượng: ${d.durationMinutes} phút • Điểm tối đa: ${d.maxScore}đ` +
+          (d.openTime ? ` • Mở từ: ${formatDeadlineVi(d.openTime)}` : "") +
+          (d.deadline ? ` • Hạn thu: ${formatDeadlineVi(d.deadline)}` : "");
+        document.getElementById("export-count-p1").textContent = `${p1} câu`;
+        document.getElementById("export-count-p2").textContent = `${p2} câu`;
+        document.getElementById("export-count-p3").textContent = `${p3} câu`;
+        const modes = [];
+        if (d.useIRT) modes.push("IRT 2PL");
+        if (d.useAdaptiveScoring) modes.push("Hiếm điểm cao + Phạt 5 sai→6 đúng");
+        document.getElementById("export-scoring-mode").textContent = modes.length > 0 ? modes.join(" + ") : "Thang điểm chuẩn";
+        return;
+      }
+
+      step1El.classList.remove("hidden");
+      step2El.classList.add("hidden");
+      pill1.className = "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-blue-800 text-white";
+      pill2.className = "px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200";
+
+      const listEl = document.getElementById("creator-questions-list");
+      listEl.innerHTML = "";
+      if (d.questions.length === 0) {
+        listEl.innerHTML = `<div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-8 text-center text-xs sm:text-sm text-slate-500">Bản nháp đang trống. Hãy chọn <strong>Mẫu 22 câu (12-4-6)</strong>, <strong>Mẫu 28 câu (18-4-6)</strong>, tải file Word/PDF hoặc bấm nút <strong>+ Trắc nghiệm / + Đúng Sai / + Trả lời ngắn</strong> ở trên.</div>`;
+        return;
+      }
+
+      d.questions.forEach((q, idx) => {
+        q.id = idx + 1;
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3";
+        const partName = q.part === 1 ? "Phần I (Trắc nghiệm)" : q.part === 2 ? "Phần II (Đúng/Sai)" : "Phần III (Trả lời ngắn)";
+
+        let ansHtml = "";
+        if (q.part === 1) {
+          const letters = ["A", "B", "C", "D"];
+          ansHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${q.options.map((opt, i) => `
+            <div class="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+              <button type="button" data-i="${i}" class="c-mc-ans px-2 py-1 rounded-lg text-xs font-extrabold border ${q.correct === i ? "bg-emerald-600 text-white border-emerald-700" : "bg-white text-slate-700 border-slate-300"}">${letters[i]}</button>
+              <input type="text" data-i="${i}" value="${opt.replace(/"/g, '&quot;')}" class="c-mc-opt flex-1 text-xs px-2 py-1 rounded-lg border border-slate-300 bg-white" />
+            </div>`).join("")}</div>`;
+        } else if (q.part === 2) {
+          const lbs = ["a)", "b)", "c)", "d)"];
+          ansHtml = `<div class="space-y-1.5">${q.statements.map((st, i) => `
+            <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+              <span class="font-bold text-xs text-blue-900 w-5">${lbs[i]}</span>
+              <input type="text" data-i="${i}" value="${st.replace(/"/g, '&quot;')}" class="c-tf-st flex-1 text-xs px-2 py-1 rounded-lg border border-slate-300 bg-white" />
+              <button type="button" data-i="${i}" class="c-tf-ans px-2.5 py-1 rounded-lg text-xs font-bold border ${q.correct[i] ? "bg-emerald-600 text-white border-emerald-700" : "bg-rose-600 text-white border-rose-700"}">${q.correct[i] ? "Đúng" : "Sai"}</button>
+            </div>`).join("")}</div>`;
+        } else {
+          ansHtml = `<div class="flex items-center gap-2"><span class="text-xs font-bold text-slate-700">Đáp số:</span><input type="text" value="${String(q.correct).replace(/"/g, '&quot;')}" class="c-sa-ans px-3 py-1 rounded-lg border border-emerald-500 bg-emerald-50/50 text-xs font-extrabold w-40" /></div>`;
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between gap-2 flex-wrap border-b border-slate-100 pb-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-900 text-white text-xs font-bold">Câu ${q.id}</span>
+              <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-[11px] font-bold">${partName}</span>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                Điểm: <input type="number" step="0.05" min="0" value="${q.points}" class="c-q-pts w-12 text-center bg-white rounded border border-blue-300" />
+              </label>
+              <label class="flex items-center gap-1 text-[11px] font-bold text-purple-900 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+                IRT b: <input type="number" step="0.1" min="-3" max="3" value="${q.irtDifficulty}" class="c-q-irt w-12 text-center bg-white rounded border border-purple-300" />
+              </label>
+            </div>
+            <button type="button" class="c-del-q px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition">🗑️ Xóa câu</button>
+          </div>
+          <textarea rows="2" class="c-q-stem w-full text-xs sm:text-sm p-2 rounded-xl border border-slate-300">${q.stem}</textarea>
+          ${ansHtml}
+        `;
+
+        card.querySelector(".c-q-stem").addEventListener("input", (e) => { q.stem = e.target.value; });
+        card.querySelector(".c-q-pts").addEventListener("input", (e) => { const v = Number(e.target.value); if (!isNaN(v) && v >= 0) q.points = v; });
+        card.querySelector(".c-q-irt").addEventListener("input", (e) => { const v = Number(e.target.value); if (!isNaN(v)) q.irtDifficulty = Math.max(-3, Math.min(3, v)); });
+        card.querySelector(".c-del-q").addEventListener("click", () => {
+          d.questions.splice(idx, 1);
+          renderCreatorView();
+        });
+        card.querySelectorAll(".c-mc-ans").forEach((b) => b.addEventListener("click", () => { q.correct = Number(b.dataset.i); renderCreatorView(); }));
+        card.querySelectorAll(".c-mc-opt").forEach((inp) => inp.addEventListener("input", (e) => { q.options[Number(inp.dataset.i)] = e.target.value; }));
+        card.querySelectorAll(".c-tf-ans").forEach((b) => b.addEventListener("click", () => { const i = Number(b.dataset.i); q.correct[i] = !q.correct[i]; renderCreatorView(); }));
+        card.querySelectorAll(".c-tf-st").forEach((inp) => inp.addEventListener("input", (e) => { q.statements[Number(inp.dataset.i)] = e.target.value; }));
+        const saInp = card.querySelector(".c-sa-ans");
+        if (saInp) saInp.addEventListener("input", (e) => { q.correct = e.target.value; });
+
+        listEl.appendChild(card);
+      });
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
       loadPortalData();
       initRealtimeSync();
@@ -4531,6 +5184,10 @@
 
       // Navigation tabs
       document.getElementById("nav-tab-hub").addEventListener("click", () => switchMainView("hub"));
+      document.getElementById("nav-tab-creator").addEventListener("click", () => {
+        if (!state.creatorDraft) initFreshCreatorDraft("toan", "22");
+        switchMainView("creator");
+      });
       document.getElementById("nav-tab-editor").addEventListener("click", () => switchMainView("editor"));
       document.getElementById("nav-tab-accounts").addEventListener("click", () => switchMainView("accounts"));
 
@@ -4805,6 +5462,8 @@
         ex.durationMinutes = newDur;
         ex.maxScore = newMaxScore;
         ex.useIRT = newUseIRT;
+        const adaptiveChk = document.getElementById("editor-exam-use-adaptive");
+        ex.useAdaptiveScoring = adaptiveChk ? !!adaptiveChk.checked : false;
         ex.openTime = newOpenTime;
         ex.deadline = newDeadline;
         regradeExamLeaderboard(ex);
@@ -4991,23 +5650,57 @@
       document.getElementById("btn-close-import-exam").addEventListener("click", closeImportModal);
       document.getElementById("btn-cancel-import-exam").addEventListener("click", closeImportModal);
 
-      document.getElementById("import-exam-file-input").addEventListener("change", (e) => {
+      async function extractTextFromUploadedFile(file) {
+        const ext = (file.name.split(".").pop() || "").toLowerCase();
+        // 1. Word .docx via Mammoth.js
+        if (ext === "docx" && window.mammoth) {
+          const buf = await file.arrayBuffer();
+          const result = await window.mammoth.extractRawText({ arrayBuffer: buf });
+          return result.value || "";
+        }
+        // 2. PDF .pdf via PDF.js
+        if (ext === "pdf" && window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          const buf = await file.arrayBuffer();
+          const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+          const pages = [];
+          for (let p = 1; p <= pdf.numPages; p++) {
+            const page = await pdf.getPage(p);
+            const txtContent = await page.getTextContent();
+            let lastY = null;
+            let pageStr = "";
+            txtContent.items.forEach((item) => {
+              const y = item.transform ? Math.round(item.transform[5]) : null;
+              if (lastY !== null && y !== null && Math.abs(y - lastY) > 4) pageStr += "\n";
+              pageStr += item.str + " ";
+              lastY = y;
+            });
+            pages.push(pageStr);
+          }
+          return pages.join("\n");
+        }
+        // 3. Plain text / MD / JSON / CSV / HTML
+        return await file.text();
+      }
+
+      document.getElementById("import-exam-file-input").addEventListener("change", async (e) => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
         if (!document.getElementById("import-exam-title").value.trim()) {
           document.getElementById("import-exam-title").value = file.name.replace(/\.[^.]+$/, "");
         }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          const content = String(ev.target.result || "");
+        document.getElementById("import-parse-preview").textContent = `⏳ Đang đọc và trích xuất nội dung từ "${file.name}"...`;
+        try {
+          const content = await extractTextFromUploadedFile(file);
           document.getElementById("import-exam-raw-text").value = content;
           const qs = parseExamTextToQuestions(content);
           document.getElementById("import-parse-preview").textContent =
             qs.length > 0
               ? `✅ Đã nhận diện ${qs.length} câu hỏi từ "${file.name}" (${qs.filter(q=>q.part===1).length} P.I • ${qs.filter(q=>q.part===2).length} P.II • ${qs.filter(q=>q.part===3).length} P.III).`
-              : "⚠️ Chưa nhận diện được câu hỏi. Kiểm tra lại định dạng 'Câu 1: ... A. ... B. ...'.";
-        };
-        reader.readAsText(file);
+              : `⚠️ Đã đọc xong "${file.name}" nhưng chưa nhận diện được mẫu 'Câu 1: ...'. Bạn có thể chỉnh sửa nhanh trong ô bên trên.`;
+        } catch (err) {
+          document.getElementById("import-parse-preview").textContent = `❌ Không thể đọc file "${file.name}". Hãy kiểm tra định dạng .docx/.pdf/.txt.`;
+        }
       });
 
       document.getElementById("import-exam-raw-text").addEventListener("input", (e) => {
@@ -5079,12 +5772,10 @@ Câu 3: Tính khối lượng muối thu được khi cho 2,7g Al tác dụng h�
       const createExamModal = document.getElementById("create-exam-modal");
       const openCreateExamModal = () => {
         if (state.currentUser.role !== "admin") return;
-        document.getElementById("create-exam-title").value =
-          `Đề số ${String(state.exams.length + 1).padStart(2, "0")}: Đề Luyện HSG Toán 12`;
-        document.getElementById("create-exam-open-time").value = "";
-        document.getElementById("create-exam-deadline").value = "";
-        createExamModal.classList.remove("hidden");
-        createExamModal.classList.add("flex");
+        const defaultSubj = state.activeSubjectFilter !== "all" ? state.activeSubjectFilter : "toan";
+        initFreshCreatorDraft(defaultSubj, "22");
+        switchMainView("creator");
+        showToast("✨ Đã mở Không gian Tạo Đề Độc Lập (chưa hiển thị cho học sinh đến khi Xuất Đề).");
       };
       const closeCreateExamModal = () => {
         createExamModal.classList.add("hidden");
@@ -5093,6 +5784,132 @@ Câu 3: Tính khối lượng muối thu được khi cho 2,7g Al tác dụng h�
       document.getElementById("btn-create-exam-modal").addEventListener("click", openCreateExamModal);
       document.getElementById("btn-hub-open-create-exam").addEventListener("click", openCreateExamModal);
       document.getElementById("btn-editor-new-exam").addEventListener("click", openCreateExamModal);
+      // IRT Guide Modal wiring
+      const irtGuideModal = document.getElementById("irt-guide-modal");
+      const openIrtGuide = () => {
+        irtGuideModal.classList.remove("hidden");
+        irtGuideModal.classList.add("flex");
+        renderMathInContainer(irtGuideModal);
+      };
+      const closeIrtGuide = () => {
+        irtGuideModal.classList.add("hidden");
+        irtGuideModal.classList.remove("flex");
+      };
+      document.getElementById("btn-open-irt-guide-editor").addEventListener("click", openIrtGuide);
+      document.getElementById("btn-open-irt-guide-creator").addEventListener("click", openIrtGuide);
+      document.getElementById("btn-close-irt-guide").addEventListener("click", closeIrtGuide);
+      document.getElementById("btn-close-irt-guide-2").addEventListener("click", closeIrtGuide);
+
+      // Independent Creator View wiring (Templates 12-4-6, 18-4-6, Blank, Multi-Format File Upload, Step 2 Export/Publish)
+      document.getElementById("btn-tpl-12-4-6").addEventListener("click", () => {
+        const subj = document.getElementById("creator-subject").value || "toan";
+        initFreshCreatorDraft(subj, "22");
+        renderCreatorView();
+        showToast("📋 Đã nạp Mẫu Đề 22 câu (12 TN • 4 Đ/S • 6 TLN) vào bản nháp!");
+      });
+      document.getElementById("btn-tpl-18-4-6").addEventListener("click", () => {
+        const subj = document.getElementById("creator-subject").value || "toan";
+        initFreshCreatorDraft(subj, "28");
+        renderCreatorView();
+        showToast("📋 Đã nạp Mẫu Đề 28 câu (18 TN • 4 Đ/S • 6 TLN) vào bản nháp!");
+      });
+      document.getElementById("btn-tpl-blank").addEventListener("click", () => {
+        const subj = document.getElementById("creator-subject").value || "toan";
+        initFreshCreatorDraft(subj, "blank");
+        renderCreatorView();
+        showToast("📝 Đã tạo bản nháp đề trống độc lập!");
+      });
+
+      document.getElementById("creator-file-input").addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const statusEl = document.getElementById("creator-file-status");
+        statusEl.textContent = `⏳ Đang đọc và trích xuất câu hỏi từ "${file.name}"...`;
+        try {
+          const content = await extractTextFromUploadedFile(file);
+          const qs = parseExamTextToQuestions(content);
+          if (!state.creatorDraft) initFreshCreatorDraft(document.getElementById("creator-subject").value || "toan", "blank");
+          syncCreatorFormIntoDraft();
+          if (qs.length > 0) {
+            state.creatorDraft.questions = qs;
+            state.creatorDraft.title = file.name.replace(/\.[^.]+$/, "");
+            renderCreatorView();
+            statusEl.textContent = `✅ Đã nạp ${qs.length} câu từ "${file.name}" (${qs.filter(q=>q.part===1).length} P.I • ${qs.filter(q=>q.part===2).length} P.II • ${qs.filter(q=>q.part===3).length} P.III).`;
+            showToast(`✅ Đã đọc xong file "${file.name}" (${qs.length} câu)!`);
+          } else {
+            statusEl.textContent = `⚠️ Đọc xong "${file.name}" nhưng chưa nhận diện được mẫu 'Câu 1: ...'.`;
+          }
+        } catch (err) {
+          statusEl.textContent = `❌ Lỗi khi đọc file "${file.name}". Hỗ trợ .docx, .pdf, .txt, .md, .json, .csv.`;
+        }
+      });
+
+      function addDraftQuestion(partNum) {
+        syncCreatorFormIntoDraft();
+        const d = state.creatorDraft;
+        const nextId = d.questions.length + 1;
+        if (partNum === 1) {
+          d.questions.push({ id: nextId, part: 1, chapter: 1, topic: "Trắc nghiệm", points: 0.25, irtDifficulty: 0, stem: `Câu ${nextId}: ...`, options: ["A", "B", "C", "D"], correct: 0, explanation: "" });
+        } else if (partNum === 2) {
+          d.questions.push({ id: nextId, part: 2, chapter: 1, topic: "Đúng/Sai", points: 1.0, irtDifficulty: 0.5, stem: `Câu ${nextId}: ...`, statements: ["Ý a)", "Ý b)", "Ý c)", "Ý d)"], correct: [true, true, false, false], explanation: "" });
+        } else {
+          d.questions.push({ id: nextId, part: 3, chapter: 2, topic: "Trả lời ngắn", points: 0.5, irtDifficulty: 1.0, stem: `Câu ${nextId}: ...`, correct: "0", explanation: "" });
+        }
+        renderCreatorView();
+      }
+      document.getElementById("btn-creator-add-mc").addEventListener("click", () => addDraftQuestion(1));
+      document.getElementById("btn-creator-add-tf").addEventListener("click", () => addDraftQuestion(2));
+      document.getElementById("btn-creator-add-sa").addEventListener("click", () => addDraftQuestion(3));
+
+      document.getElementById("btn-go-to-export-step").addEventListener("click", () => {
+        syncCreatorFormIntoDraft();
+        const d = state.creatorDraft;
+        if (!d.title.trim()) { showToast("Vui lòng nhập tên đề thi!"); return; }
+        if (!d.questions || d.questions.length === 0) { showToast("Đề thi cần ít nhất 1 câu hỏi trước khi xuất đề!"); return; }
+        if (d.openTime && d.deadline && new Date(d.openTime).getTime() >= new Date(d.deadline).getTime()) {
+          showToast("Giờ mở đề phải sớm hơn giờ kết thúc thu bài!");
+          return;
+        }
+        d.step = 2;
+        renderCreatorView();
+      });
+
+      document.getElementById("btn-back-to-creator-step1").addEventListener("click", () => {
+        if (state.creatorDraft) {
+          state.creatorDraft.step = 1;
+          renderCreatorView();
+        }
+      });
+
+      document.getElementById("btn-export-download-json").addEventListener("click", () => {
+        if (!state.creatorDraft) return;
+        const blob = new Blob([JSON.stringify(state.creatorDraft, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${(state.creatorDraft.title || "de_thi").replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("💾 Đã tải xuống file đề (.json)!");
+      });
+
+      document.getElementById("btn-confirm-publish-exam").addEventListener("click", () => {
+        if (!state.creatorDraft || state.currentUser.role !== "admin") return;
+        const published = JSON.parse(JSON.stringify(state.creatorDraft));
+        delete published.step;
+        published.questions = normalizeExamQuestions(published.questions);
+        state.exams.unshift(published);
+        state.activeExamId = published.examId;
+        state.editorExamId = published.examId;
+        state.creatorDraft = null;
+        syncActiveExamIntoWorkspace(true);
+        saveAndSyncAllDevices(true);
+        switchMainView("hub");
+        showToast(`🚀 Đã xuất đề "${published.title}" lên Phòng Luyện & đồng bộ toàn bộ thiết bị!`);
+      });
+
       // Delete Question Modal wiring
       const deleteQModal = document.getElementById("delete-question-modal");
       const closeDeleteQModal = () => {
